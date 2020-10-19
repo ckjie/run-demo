@@ -6,7 +6,7 @@
 		<view class="grid-box">
 			<uni-grid :column="2">
 				<uni-grid-item v-for="item in gridList" :key="item.key">
-					<view class="grid-item" @tap="toCreateOrder(item)">
+					<view class="grid-item" @tap="toPage('/pages/order/create-order?key=' + item.key)">
 						<image :src="item.icon" mode="aspectFit"></image>
 						<view>{{ item.title }}</view>
 					</view>
@@ -16,13 +16,7 @@
 		<view class="description">
 			<view class="title">跑腿特色</view>
 			<view class="flex list">
-				<view class="item">
-					<view class="flex icon-box">
-						<uni-icons type="sound" size="24"></uni-icons>
-					</view>
-					<view>价格问题</view>
-				</view>
-				<view class="item">
+				<view class="item" @tap="toPage('/pages/other/rich?key=priceAbout')">
 					<view class="flex icon-box">
 						<uni-icons type="sound" size="24"></uni-icons>
 					</view>
@@ -35,7 +29,7 @@
 </template>
 
 <script>
-	import userTabbar from '../../components/user-tabbar/user-tabbar.vue'
+	import userTabbar from '@/components/user-tabbar/user-tabbar.vue'
 	export default {
 		components: {
 			userTabbar
@@ -68,9 +62,9 @@
 			}
 		},
 		methods: {
-			toCreateOrder (item) {
+			toPage (url) {
 				uni.navigateTo({
-					url: '../order/create-order?key=' + item.key
+					url
 				})
 			}
 		}

@@ -1,20 +1,21 @@
 <template>
 	<view class="page-bgc page">
 		<view class="body">
-			<view class="title">{{ titleSource[textKey] }}</view>
+			<view v-if="textKey === 'protocol'" class="title">{{ titleSource[textKey] }}</view>
 			<jyf-parser :html="richText" ref="article"></jyf-parser>
 		</view>
 	</view>
 </template>
 
 <script>
-	import { protocol } from '@/utils/rich-texts.js'
+	import { protocol, priceAbout } from '@/utils/rich-texts.js'
 	
 	export default {
 		data() {
 			return {
 				titleSource: {
-					protocol: '帮送服务协议'
+					protocol: '帮送服务协议',
+					priceAbout: '常见问题'
 				},
 				textKey: ''
 			}
@@ -31,6 +32,8 @@
 			richText () {
 				if (this.textKey === 'protocol') {
 					return protocol
+				} else if (this.textKey === 'priceAbout') {
+					return priceAbout
 				}
 			}
 		},

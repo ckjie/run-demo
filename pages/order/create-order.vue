@@ -184,7 +184,7 @@
 					<view>供骑手代购时参考（可选填）</view>
 					<view class="flex input-box">
 						<view>预估 ￥</view>
-						<input class="input" type="number" value="" />
+						<input class="input" type="number" value="" focus />
 					</view>
 					<view class="flex prompt">
 						<uni-icons type="info" color="#c0c0c0" size="12"></uni-icons>
@@ -202,10 +202,10 @@
 					<view class="title">取件时间</view>
 				</view>
 				<view class="body">
-					<view class="list date-list">
+					<scroll-view class="list date-list" scroll-y="true">
 						<view class="item" :class="{'active': item === formData.date}" v-for="item in dateList" :key="item" @tap="clickDate(item)">{{ item }}</view>
-					</view>
-					<view class="list time-list">
+					</scroll-view>
+					<scroll-view class="list time-list" scroll-y="true">
 						<block v-if="formData.date === dateList[0]">
 							<view class="item" v-for="item in todayTimeList" :key="item" @tap="clickTime(item)">
 								<view :class="{'active': item === formData.time}">{{ item }}</view>
@@ -218,7 +218,7 @@
 								<uni-icons class="icon" v-show="item === formData.time" type="checkmarkempty" color="#0CD6A6" size="14"></uni-icons>
 							</view>
 						</block>
-					</view>
+					</scroll-view>
 				</view>
 			</view>
 		</uni-popup>
@@ -437,7 +437,9 @@
 				for (let i = 0; i < 8; i++) {
 					i > 0 && (date += 1)
 					now.setDate(date)
-					const item = (now.toLocaleDateString()).replace(/\-/g, '/').split('/').slice(1).join('-')
+					const m = ('0' + (now.getMonth() + 1)).slice(-2)
+					const d = ('0' + now.getDate()).slice(-2)
+					const item = `${m}-${d}`
 					dateList.push(item)
 				}
 				this.dateList = dateList
@@ -448,7 +450,9 @@
 				let tomorrow = new Date()
 				const date = tomorrow.getDate() + 1
 				tomorrow.setDate(date)
-				tomorrow = new Date(tomorrow.toLocaleDateString() + ' 00:00:00')
+				tomorrow.setHours(0)
+				tomorrow.setMinutes(0)
+				tomorrow.setSeconds(0)
 				const tomorrowTime = tomorrow.getTime()
 				const timeList = []
 				while(now.getTime() < tomorrowTime) {
@@ -458,7 +462,14 @@
 					const time = now.toTimeString().slice(0, 5)
 					now.getTime() <= tomorrowTime && timeList.push(time)
 				}
-				timeList[0] = `立即送出(约${timeList[0]})`
+				if (timeList.length) {
+					timeList[0] = `立即送出(约${timeList[0]})`
+				} else {
+					const m = ('0' + (now.getMonth() + 1)).slice(-2)
+					const d = ('0' + now.getDate()).slice(-2)
+					const time = now.toTimeString().slice(0, 5)
+					timeList[0] = `立即送出(约${m}-${d} ${time})`
+				}
 				this.todayTimeList = timeList
 				this.formData.time = timeList[0]
 			},
@@ -597,7 +608,7 @@
 
 <style lang="scss" scoped>
 .page {
-	padding: 20rpx 20rpx 140rpx;
+	padding: 20rpx 20rpx 160rpx;
 }
 
 .section {
@@ -683,6 +694,11 @@
 					margin-left: 20rpx;
 				}
 			}
+			/deep/ .uni-list-item__container {
+				&::after {
+					display: none;
+				}
+			}
 		}
 	}
 }
@@ -713,6 +729,7 @@
 	.btn-box {
 		.submit-btn {
 			width: 100%;
+			padding: 10rpx 0;
 			background-color: $uni-color-main;
 		}
 	}
@@ -791,6 +808,7 @@
 
 .attach {
 	.item {
+		padding: 10rpx 0;
 		.title {
 			width: 140rpx;
 			margin-right: 0;
@@ -880,10 +898,11 @@
 		align-items: flex-start;
 		.list {
 			height: 460rpx;
-			overflow-y: scroll;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
+			// overflow-y: scroll;
+			text-align: center;
+			// display: flex;
+			// flex-direction: column;
+			// align-items: center;
 			.item {
 				text-align: center;
 				padding: 20rpx 0;

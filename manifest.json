@@ -42,12 +42,12 @@
     },
     "quickapp" : {},
     "mp-weixin" : {
-        "appid" : "wx344b7814fd2ac3e4",
+        "appid" : "wxd4b354044e2b22e6",
         "setting" : {
             "urlCheck" : true,
             "es6" : true,
             "postcss" : true,
-            "minified" : true
+            "minified" : false
         },
         "permission" : {
             "scope.userLocation" : {
