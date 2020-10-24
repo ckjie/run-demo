@@ -6,6 +6,13 @@
 
 <script>
 	export default {
+		props: {
+			count: {
+				type: [String, Number],
+				default: 9
+			}
+		},
+		
 		data () {
 			return {
 				
@@ -15,6 +22,7 @@
 		methods: {
 			uploadPic () {
 				uni.chooseImage({
+					count: this.count,
 					success: res => {
 						this.$emit('uploadSucess', res.tempFilePaths)
 					}

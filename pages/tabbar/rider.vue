@@ -1,6 +1,22 @@
 <template>
-	<view>
-		<view>rider</view>
+	<view class="page-bgc">
+		<view class="top">
+			<view class="info-box">
+				<view class="avatar"></view>
+				<view class="nickname">法外狂徒--张三</view>
+			</view>
+		</view>
+		<view class="menus">
+			<uni-list>
+				<uni-list-item title="成为骑手" showExtraIcon="true" :extraIcon="{ color: '#999', size: '16', type: 'contact-filled' }" @tap="relaunchPage('/pages/user/application')"></uni-list-item>
+				<button class="btn-item" open-type="contact">
+					<uni-list-item title="帮助" showExtraIcon="true" :extraIcon="{ color: '#999', size: '16', type: 'help-filled' }"></uni-list-item>
+				</button>
+				<button class="btn-item" open-type="openSetting">
+					<uni-list-item title="设置" showExtraIcon="true" :extraIcon="{ color: '#999', size: '16', type: 'gear-filled' }"></uni-list-item>
+				</button>
+			</uni-list>
+		</view>
 		<riderTabbar></riderTabbar>
 	</view>
 </template>
@@ -11,15 +27,68 @@
 		components: {
 			riderTabbar
 		},
-		
 		data() {
 			return {
 				
-			};
+			}
+		},
+		methods: {
+			toPage (url) {
+				uni.navigateTo({
+					url
+				})
+			},
+			
+			relaunchPage (url) {
+				uni.reLaunch({
+					url
+				})
+			}
 		}
 	}
 </script>
 
 <style lang="scss" scoped>
-
+.top {
+	position: relative;
+	background-color: red;
+	height: 300rpx;
+	.info-box {
+		padding-top: 80rpx;
+		text-align: center;
+		.avatar {
+			width: 80rpx;
+			height: 80rpx;
+			border-radius: 50%;
+			background-color: $uni-color-main;
+			margin: 0 auto 20rpx;
+		}
+	}
+	.setting {
+		position: absolute;
+		top: 20rpx;
+		right: 10rpx;
+		.icon-item {
+			padding: 0 10rpx;
+			background-color: unset;
+			line-height: unset;
+			&::after {
+				display: none;
+			}
+		}
+	}
+}
+.menus {
+	margin-top: 20rpx;
+	.btn-item {
+		width: 100%;
+		background-color: unset;
+		padding: 0;
+		line-height: unset;
+		text-align: unset;
+		&::after {
+			display: none;
+		}
+	}
+}
 </style>

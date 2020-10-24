@@ -6,7 +6,7 @@
 				<view class="flex item" v-for="(item, idx) in addressList" :key="idx">
 					<view class="left" @tap="chooseAddress(item)">
 						<view class="flex contact">
-							<view class="name">{{ item.name }}</view>
+							<view class="name">{{ item.realname }} {{ item.sexName }}</view>
 							<view class="phone">{{ item.phone }}</view>
 						</view>
 						<view class="address">{{ item.address }}</view>
@@ -18,7 +18,7 @@
 			</view>
 		</view>
 		
-		<view class="add-btn" @tap="editAddress">
+		<view class="add-btn" @tap="editAddress()">
 			<view class="flex btn-box">
 				<uni-icons type="plus-filled" color="#0CD6A6" size="16"></uni-icons>
 				<view class="text">新增收货地址</view>
@@ -31,34 +31,65 @@
 	export default {
 		data() {
 			return {
-				addressList: [
-					{
-						name: '张三',
-						phone: 13131313131,
-						address: '广东省广州市天河区天河南228号广晟大厦'
-					},
-					{
-						name: '李四',
-						phone: 16666666666,
-						address: '广东省广州市海珠区新港街道广州大道南448号财智大厦'
-					},
-				]
+				canTap: false,
+				addressType: '',
+				addressList: []
 			}
 		},
+		
+		onLoad (params) {
+			if (params.type) {
+				this.canTap = true
+				this.addressType = params.type
+			}
+		},
+		
+		onShow () {
+			this.getList()
+		},
+		
 		methods: {
+			getList () {
+				uni.showLoading({
+					title: '加载中...'
+				})
+				this.addressList.splice(0)
+				const params = {
+					api: '/api/address/list',
+					params: {
+						page: 1,
+						size: 999
+					}
+				}
+				this.$myRequest(params).then(res => {
+					uni.hideLoading()
+					if (res.data.err_code !== 0) return
+					res.data.data.forEach(item => {
+						item.sexName = item.sex === '0' ? '先生' : '女士'
+						this.addressList.push(item)
+					})
+				})
+			},
+			
 			chooseAddress (item) {
+				if (!this.canTap) return
 				const pages = getCurrentPages()
 				const prevPage = pages[pages.length - 2]
 				prevPage.setData({
-					deliveryAddress: item
+					address: item,
+					addressType: this.addressType
 				})
 				uni.navigateBack({
 					delta: 1
 				})
 			},
 			editAddress (item) {
+				let url = '/pages/user/edit-address'
+				if (item) {
+					url = url + '?item=' + encodeURIComponent(JSON.stringify(item))
+				}
 				uni.navigateTo({
-					url: '/pages/user/edit-address'
+					url
 				})
 			}
 		}

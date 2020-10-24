@@ -1,7 +1,8 @@
 <script>
 export default {
 	globalData: {
-		baseUrl: 'https://mpsubjects.by-health.com'
+		baseUrl: 'https://www.it-demo.top',
+		appid: 'wxd4b354044e2b22e6'
 	},
 	
 	onLaunch: function() {

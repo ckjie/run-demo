@@ -24,13 +24,25 @@
 					</view>
 				</view>
 				<uni-list class="address">
-					<uni-list-item v-show="formData.buyType === 'address'" title="购买地址" :rightText="(buyAddress.address ? buyAddress.address : '在哪里买')" @tap="chooseBuyAddress"></uni-list-item>
-					<uni-list-item v-if="wordsKey === 'send'" title="取货" :rightText="(buyAddress.address ? buyAddress.address : '在哪里取')" @tap="toPage('/pages/user/address-list')"></uni-list-item>
-					<uni-list-item v-if="wordsKey === 'handle'" title="代办点" :rightText="(buyAddress.address ? buyAddress.address : '选择代办地点')" @tap="toPage('/pages/user/address-list')"></uni-list-item>
-					<uni-list-item v-if="wordsKey === 'handle'" title="代办点2" :rightText="(buyAddress.address ? buyAddress.address : '选择代办地点2（可两个地址一样）')" @tap="toPage('/pages/user/address-list')"></uni-list-item>
-					<uni-list-item v-if="wordsKey === 'take'" title="取件地址" :rightText="(buyAddress.address ? buyAddress.address : '选择快递公司地址')" @tap="toPage('/pages/user/address-list')"></uni-list-item>
-					<uni-list-item v-if="['buy', 'send', 'take'].includes(wordsKey)" title="收货" :rightText="deliveryAddress.address || '送到哪里去'" @tap="toPage('/pages/user/address-list')"></uni-list-item>
-					<uni-list-item v-if="deliveryAddress.name" title="联系人" :rightText="`${deliveryAddress.name} ${deliveryAddress.phone}`"></uni-list-item>
+					<uni-list-item v-show="formData.buyType === 'address'" title="购买地址" :rightText="(formData.buyAddress.address ? formData.buyAddress.address : '在哪里买')" @tap="chooseBuyAddress"></uni-list-item>
+					<block v-if="wordsKey === 'send'">
+						<uni-list-item title="取货" :rightText="(formData.sendAddress.address ? formData.sendAddress.address : '在哪里取')" @tap="toPage('/pages/user/address-list?type=send')"></uni-list-item>
+						<uni-list-item v-if="formData.sendAddress.realname" title="联系人" :rightText="`${formData.sendAddress.realname} ${formData.sendAddress.phone}`"></uni-list-item>
+					</block>
+					<block v-if="wordsKey === 'handle'">
+						<uni-list-item title="代办点" :rightText="(formData.handleAddress1.address ? formData.handleAddress1.address : '选择代办地点')" @tap="toPage('/pages/user/address-list?type=handle1')"></uni-list-item>
+						<uni-list-item v-if="formData.handleAddress1.realname" title="联系人" :rightText="`${formData.handleAddress1.realname} ${formData.handleAddress1.phone}`"></uni-list-item>
+						<uni-list-item title="代办点2" :rightText="(formData.handleAddress2.address ? formData.handleAddress2.address : '选择代办地点2（可两个地址一样）')" @tap="toPage('/pages/user/address-list?type=handle2')"></uni-list-item>
+						<uni-list-item v-if="formData.handleAddress2.realname" title="联系人" :rightText="`${formData.handleAddress2.realname} ${formData.handleAddress2.phone}`"></uni-list-item>
+					</block>
+					<block v-if="wordsKey === 'take'">
+						<uni-list-item title="取件地址" :rightText="(formData.takeAddress.address ? formData.takeAddress.address : '选择快递公司地址')" @tap="toPage('/pages/user/address-list?type=take')"></uni-list-item>
+						<uni-list-item v-if="formData.takeAddress.realname" title="联系人" :rightText="`${formData.takeAddress.realname} ${formData.takeAddress.phone}`"></uni-list-item>
+					</block>
+					<block v-if="['buy', 'send', 'take'].includes(wordsKey)">
+						<uni-list-item title="收货" :rightText="formData.receiptAddress.address || '送到哪里去'" @tap="toPage('/pages/user/address-list?type=receipt')"></uni-list-item>
+						<uni-list-item v-if="formData.receiptAddress.realname" title="联系人" :rightText="`${formData.receiptAddress.realname} ${formData.receiptAddress.phone}`"></uni-list-item>
+					</block>
 					<view class="flex inline-list-item">
 						<uni-list-item :title="`${formData.date} ${formData.time}`" @tap="openPopup('timePopup')"></uni-list-item>
 						<uni-list-item v-if="wordsKey !== 'handle'" :title="'物品重量: ' + (formData.weight === 10 ? '10公斤内' : formData.weight + '公斤')" @tap="openPopup('weightPopup')"></uni-list-item>
@@ -338,15 +350,17 @@
 					pickupAddress: '',
 					rider: '',
 					incidentally: [],
-					tip: 0
+					tip: 0,
+					buyAddress: {},
+					sendAddress: {},
+					handleAddress1: {},
+					handleAddress2: {},
+					takeAddress: {},
+					receiptAddress: {},
+					realname: '',
+					phone: ''
 				},
-				buyAddress: {
-					address: '',
-					latitude: '',
-					longitude: '',
-					name: ''
-				},
-				deliveryAddress: {},
+				addressType: '',
 				commonWords: {
 					buy: ['小吃', '快餐', '美食', '饮品', '生鲜', '医药', '其他'],
 					send: ['快递包裹', '钥匙文件', '餐饮食品', '其他'],
@@ -406,20 +420,32 @@
 			});
 			
 			this.init()
-			this.$myRequest({
-				api: '/api/xiaotang/GetHotSearchList',
-				params: { type: '' }
-			}).then(res => {
-				console.log(res, 'rrr')
-			}).catch(err => {
-				console.log(err, 'eeeee')
-			})
 		},
 		onShow () {
 			const pages = getCurrentPages()
 			const currPage = pages[pages.length - 1]
-			if (currPage.data.deliveryAddress.address) {
-				this.deliveryAddress = currPage.data.deliveryAddress
+			console.log(currPage.data.addressType, 'tttt')
+			if (currPage.data.addressType) {
+				const address = currPage.data.address
+				switch (currPage.data.addressType) {
+					case 'send':
+						this.$set(this.formData, 'sendAddress', address)
+						break
+					case 'handle1':
+						this.$set(this.formData, 'handleAddress1', address)
+						break
+					case 'handle2':
+						this.$set(this.formData, 'handleAddress2', address)
+						break
+					case 'take':
+						this.$set(this.formData, 'takeAddress', address)
+						break
+					case 'receipt':
+						this.$set(this.formData, 'receiptAddress', address)
+						break
+					default:
+						break
+				}
 			}
 		},
 		
@@ -492,7 +518,7 @@
 			chooseBuyAddress () {
 				uni.chooseLocation({
 					success: res => {
-						this.buyAddress = Object.assign({}, this.buyAddress, {
+						this.formData.buyAddress = Object.assign({}, this.formData.buyAddress, {
 							address: res.address,
 							latitude: res.latitude,
 							longitude: res.longitude,

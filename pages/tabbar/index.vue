@@ -3,19 +3,25 @@
 		<view class="list">
 			<view class="menu-item" v-for="(item, idx) in menuList" :key="idx">
 				<view class="avatar">
-					<image :src="item.avatar" lazy-load="true" mode="aspectFill" @tap="previewImg(0, [item.avatar])"></image>
+					<my-img :src="item.avatar"></my-img>
 				</view>
 				<view class="content">
 					<view class="title">{{ item.title }}</view>
-					<view class="introduction">{{ item.introduction }}</view>
+					<view class="introduction">{{ item.detail }}</view>
 					<view v-if="item.picList.length === 1" class="single-pic">
-						<image class="pic-item" :src="item.picList[0]" lazy-load="true" mode="aspectFill" @tap="previewImg(0, item.picList)"></image>
+						<view class="pic-item" v-for="(picItem, picIdx) in item.picList" :key="picIdx">
+							<my-img :src="picItem"></my-img>
+						</view>
 					</view>
-					<view v-else-if="item.picList.length === 2" class="double-pic">
-						<image class="pic-item" v-for="(picItem, picIdx) in item.picList" :key="picIdx" :src="picItem" lazy-load="true" mode="aspectFill" @tap="previewImg(picIdx, item.picList)"></image>
+					<view v-else-if="item.picList.length === 2" class="flex double-pic">
+						<view class="pic-item" v-for="(picItem, picIdx) in item.picList" :key="picIdx">
+							<my-img :src="picItem" :previewList="item.picList" :previewIdx="picIdx"></my-img>
+						</view>
 					</view>
-					<view v-else class="pic-list">
-						<image class="pic-item" v-for="(picItem, picIdx) in item.picList" :key="picIdx" :src="picItem" lazy-load="true" mode="aspectFill" @tap="previewImg(picIdx, item.picList)"></image>
+					<view v-else-if="item.picList.length >= 3" class="pic-list">
+						<view class="pic-item" v-for="(picItem, picIdx) in item.picList" :key="picIdx">
+							<my-img :src="picItem" :previewList="item.picList" :previewIdx="picIdx"></my-img>
+						</view>
 						<view v-if="item.picList.length % 3 === 2" class="pic-item fill-item"></view>
 					</view>
 				</view>
@@ -24,10 +30,6 @@
 		</view>
 		
 		<userTabbar></userTabbar>
-		<!-- <view class="intro">本项目已包含uni ui组件，无需import和注册，可直接使用。在代码区键入字母u，即可通过代码助手列出所有可用组件。光标置于组件名称处按F1，即可查看组件文档。</view>
-		<text class="intro">详见：</text>
-		<button type="default" @click="choice">点击选择位置</button>
-		<uni-link :href="href" :text="href"></uni-link> -->
 	</view>
 </template>
 
@@ -40,40 +42,15 @@
 		
 		data() {
 			return {
+				pageNum: 1,
+				pageSize: 20,
 				status: 'more',
-				href: 'https://uniapp.dcloud.io/component/README?id=uniui',
-				menuList: [
-					{
-						avatar: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1601991478011&di=1a95f56a96d3c30da6a8fdb3befbbb9e&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20181207%2Fab2c053183994bb8bdddd716da413ad8.jpeg',
-						title: '标题',
-						introduction: '简介内容',
-						picList: [
-							'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1601991478011&di=1a95f56a96d3c30da6a8fdb3befbbb9e&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20181207%2Fab2c053183994bb8bdddd716da413ad8.jpeg',
-							'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1601991478011&di=1a95f56a96d3c30da6a8fdb3befbbb9e&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20181207%2Fab2c053183994bb8bdddd716da413ad8.jpeg',
-							'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1601991478011&di=1a95f56a96d3c30da6a8fdb3befbbb9e&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20181207%2Fab2c053183994bb8bdddd716da413ad8.jpeg',
-							'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1601991478011&di=1a95f56a96d3c30da6a8fdb3befbbb9e&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20181207%2Fab2c053183994bb8bdddd716da413ad8.jpeg',
-							'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1601991478011&di=1a95f56a96d3c30da6a8fdb3befbbb9e&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20181207%2Fab2c053183994bb8bdddd716da413ad8.jpeg'
-						]
-					},
-					{
-						avatar: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1601991478011&di=1a95f56a96d3c30da6a8fdb3befbbb9e&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20181207%2Fab2c053183994bb8bdddd716da413ad8.jpeg',
-						title: '标题标题标题标题标题标题标题标题标题标题标题标题标题标题标题标题标题标题标题标题',
-						introduction: '简介内容简介内容简介内容简介内容简介内容简介内容简介内容简介内容简介内容简介内容简介内容简介内容',
-						picList: [
-							'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1601991478011&di=1a95f56a96d3c30da6a8fdb3befbbb9e&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20181207%2Fab2c053183994bb8bdddd716da413ad8.jpeg',
-							'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1601991478011&di=1a95f56a96d3c30da6a8fdb3befbbb9e&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20181207%2Fab2c053183994bb8bdddd716da413ad8.jpeg'
-						]
-					},
-					{
-						avatar: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1601991478011&di=1a95f56a96d3c30da6a8fdb3befbbb9e&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20181207%2Fab2c053183994bb8bdddd716da413ad8.jpeg',
-						title: '标题标题标题标题标题标题标题标题标题标题标题标题标题标题标题标题标题标题标题标题',
-						introduction: '简介内容简介内容简介内容简介内容简介内容简介内容简介内容简介内容简介内容简介内容简介内容简介内容',
-						picList: [
-							'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1601991478011&di=1a95f56a96d3c30da6a8fdb3befbbb9e&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20181207%2Fab2c053183994bb8bdddd716da413ad8.jpeg'
-						]
-					}
-				]
+				menuList: []
 			}
+		},
+		
+		onLoad() {
+			this.getData()
 		},
 		
 		onReachBottom () {
@@ -91,18 +68,28 @@
 		},
 		
 		methods: {
-			previewImg (idx, list) {
-				uni.previewImage({
-					current: idx || 0,
-					urls: list
-				})
-			},
-			
-			choice () {
-				uni.chooseLocation({
-					success: (res) => {
-						console.log(res, 'res')
+			getData () {
+				if (this.status === 'loading') return
+				this.status = 'loading'
+				this.$myRequest({
+					api: '/api/menu/list',
+					params: {
+						page: this.pageNum,
+						size: this.pageSize
 					}
+				}).then(res => {
+					if (res.data.err_code !== 0) return
+					if (res.data.data.length < this.pageSize) {
+						this.status = 'noMore'
+					} else {
+						this.status = 'more'
+					}
+					res.data.data.forEach(item => {
+						item.content && (item.content = JSON.parse(item.content))
+						item.detail = item.content ? item.content.detail : ''
+						item.picList = item.content ? item.content.picList : [],
+						this.menuList.push(item)
+					})
 				})
 			}
 		}
@@ -140,12 +127,12 @@
 			}
 			.introduction {
 				padding: 10rpx 0;
+				word-break: break-all;
 			}
 			.single-pic {
 				.pic-item {
 					width: 300rpx;
 					height: 300rpx;
-					border-radius: 6rpx;
 				}
 			}
 			.double-pic {
@@ -153,7 +140,6 @@
 					width: 240rpx;
 					height: 240rpx;
 					margin-right: 10rpx;
-					border-radius: 6rpx;
 				}
 			}
 			.pic-list {
@@ -166,7 +152,7 @@
 					width: 190rpx;
 					height: 190rpx;
 					margin-bottom: 10rpx;
-					border-radius: 6rpx;
+					// border-radius: 6rpx;
 				}
 			}
 		}
