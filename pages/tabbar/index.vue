@@ -54,17 +54,8 @@
 		},
 		
 		onReachBottom () {
-			if (this.menuList.length >= 10) {
-				this.status = 'noMore'
-				return
-			}
-			if (this.status === 'loading') return
-			this.status = 'loading'
-			setTimeout(() => {
-				const list = JSON.parse(JSON.stringify(this.menuList.slice((0, 2))))
-				this.menuList = this.menuList.concat(list)
-				this.status = 'more'
-			}, 1500)
+			if (this.status === 'noMore') return
+			this.getData()
 		},
 		
 		methods: {

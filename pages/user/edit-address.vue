@@ -51,8 +51,8 @@
 					sex: '0'
 				},
 				sexList: [
-					{ label: '先生', value: '0' },
-					{ label: '女士', value: '1' }
+					{ label: '先生', value: '1' },
+					{ label: '女士', value: '2' }
 				]
 			}
 		},

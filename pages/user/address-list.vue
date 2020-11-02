@@ -88,9 +88,7 @@
 				if (item) {
 					url = url + '?item=' + encodeURIComponent(JSON.stringify(item))
 				}
-				uni.navigateTo({
-					url
-				})
+				this.$pageTo({ url })
 			}
 		}
 	}

@@ -45,17 +45,17 @@
 					},
 					{
 						title: '代取送',
-						key: 'send',
+						key: 'deliver',
 						icon: '/static/img/send.png'
 					},
 					{
 						title: '帮帮我',
-						key: 'handle',
+						key: 'transact',
 						icon: '/static/img/handle.png'
 					},
 					{
 						title: '包裹单',
-						key: 'take',
+						key: 'pickup',
 						icon: '/static/img/take.png'
 					}
 				]
@@ -63,9 +63,7 @@
 		},
 		methods: {
 			toPage (url) {
-				uni.navigateTo({
-					url
-				})
+				this.$pageTo({ url })
 			}
 		}
 	}

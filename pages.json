@@ -2,7 +2,7 @@
 	"pages": [{
 		"path": "pages/tabbar/index",
 		"style": {
-			"navigationBarTitleText": "uni-ui基础项目"
+			"navigationBarTitleText": "菜单列表"
 		}
 	}    ,{
             "path" : "pages/tabbar/run-errands",
@@ -33,12 +33,6 @@
 						}
         }
         ,{
-            "path" : "pages/user/setting",
-            "style" : {
-							"navigationBarTitleText": "设置"
-						}
-        }
-        ,{
             "path" : "pages/user/edit-address",
             "style" : {}
         }
@@ -50,7 +44,7 @@
             "path" : "pages/tabbar/list",
             "style" :                                                                                    
             {
-                "navigationBarTitleText": "",
+                "navigationBarTitleText": "抢单大厅",
                 "enablePullDownRefresh": false
             }
             
@@ -69,6 +63,33 @@
             "style" :                                                                                    
             {
                 "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/user/auth",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/order/order-detail",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "订单详情",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/order/orders-detail",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "订单详情",
                 "enablePullDownRefresh": false
             }
             

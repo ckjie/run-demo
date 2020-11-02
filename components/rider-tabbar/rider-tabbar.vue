@@ -36,8 +36,9 @@
 		
 		methods: {
 			toPage (item) {
-				uni.reLaunch({
-					url: item.path
+				this.$pageTo({
+					url: item.path,
+					type: 'reLaunch'
 				})
 			}
 		}

@@ -2,17 +2,11 @@
 	<view class="page-bgc">
 		<view class="top">
 			<view class="info-box">
-				<view class="avatar"></view>
-				<view class="nickname">法外狂徒--张三</view>
+				<view class="avatar">
+					<my-img :src="userInfo.avatarUrl"></my-img>
+				</view>
+				<view class="nickname">{{ userInfo.nickName }}</view>
 			</view>
-		<!-- 	<view class="flex setting">
-				<button class="icon-item" open-type="contact">
-					<uni-icons type="help" color="#fff" size="24" plain></uni-icons>
-				</button>
-				<button class="icon-item" open-type="openSetting">
-					<uni-icons type="gear-filled" color="#fff" size="24" plain></uni-icons>
-				</button>
-			</view> -->
 		</view>
 		<view class="menus">
 			<uni-list>
@@ -38,19 +32,26 @@
 		},
 		data() {
 			return {
-				
+				userInfo: {}
 			}
 		},
+		
+		onLoad () {
+			const info = uni.getStorageSync('userInfo')
+			if (info) {
+				this.userInfo = JSON.parse(info)
+			}
+		},
+		
 		methods: {
 			toPage (url) {
-				uni.navigateTo({
-					url
-				})
+				this.$pageTo({ url })
 			},
 			
 			relaunchPage (url) {
-				uni.reLaunch({
-					url
+				this.$pageTo({
+					url,
+					type: 'reLaunch'
 				})
 			}
 		}
@@ -60,7 +61,7 @@
 <style lang="scss" scoped>
 .top {
 	position: relative;
-	background-color: red;
+	// background-color: red;
 	height: 300rpx;
 	.info-box {
 		padding-top: 80rpx;
@@ -71,6 +72,9 @@
 			border-radius: 50%;
 			background-color: $uni-color-main;
 			margin: 0 auto 20rpx;
+			/deep/ .img {
+				border-radius: 50%;
+			}
 		}
 	}
 	.setting {

@@ -6,7 +6,7 @@
 		<view class="form-module">
 			<view class="flex item">
 				<view class="label">姓名：</view>
-				<input class="input" type="text" v-model.trim="formData.realname" maxlength="20" />
+				<input class="input" type="text" v-model.trim="formData.realname" maxlength="10" />
 			</view>
 			<view class="flex item">
 				<view class="label">手机：</view>
@@ -103,8 +103,9 @@
 						showCancel: false,
 						success: res => {
 							if (res.confirm) {
-								uni.reLaunch({
-									url: '/pages/tabbar/index'
+								this.$pageTo({
+									url: '/pages/tabbar/index',
+									type: 'reLaunch'
 								})
 							}
 						}
@@ -117,7 +118,8 @@
 
 <style lang="scss" scoped>
 .logo-box {
-	margin: 80rpx auto 40rpx;
+	margin: 0 auto;
+	padding: 80rpx 0 40rpx;
 	text-align: center;
 	image {
 		width: 300rpx;
