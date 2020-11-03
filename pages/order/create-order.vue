@@ -336,6 +336,7 @@
 </template>
 
 <script>
+	import uploadImage from '@/common/ossutil/uploadFile.js'
 	import uploadModule from '@/components/upload-module/upload-module.vue'
 	
 	const recorderManager = uni.getRecorderManager()
@@ -441,9 +442,14 @@
 				title: this.titleSource[params.key] || '跑腿王'
 			})
 			recorderManager.onStop(res => {
-				this.formData.sound = res.tempFilePath
-				this.formData.duration = Math.ceil(res.duration / 1000)
-				innerAudioContext.src = this.formData.sound
+				console.log(res.tempFilePath, 'res.tempFilePath')
+				uploadImage(res.tempFilePath, 'sound/', result => {
+					this.formData.sound = result
+					console.log(result, 'result')
+					this.formData.duration = Math.ceil(res.duration / 1000)
+					innerAudioContext.src = this.formData.sound
+					console.log(this.formData.sound, 'this.formData.sound')
+				})
 			});
 			
 			this.init()
@@ -451,7 +457,6 @@
 		onShow () {
 			const pages = getCurrentPages()
 			const currPage = pages[pages.length - 1]
-			console.log(currPage.data.addressType, 'tttt')
 			if (currPage.data.addressType) {
 				const address = currPage.data.address
 				switch (currPage.data.addressType) {
@@ -590,7 +595,8 @@
 				uni.vibrateShort()
 				this.isRecording = true
 				recorderManager.start({
-					duration: 120000
+					duration: 120000,
+					format: 'mp3'
 				})
 			},
 			isEnd () {
@@ -853,19 +859,26 @@
 							signType: res.data.data.signType,
 							paySign: res.data.data.paySign,
 							success: res2 => {
-								uni.showToast({
-									title: '支付成功',
-									icon: 'success'
+								this.changeOrderStatus(res.data.data.order_hash).then(result => {
+									uni.hideLoading()
+									uni.showToast({
+										title: '支付成功',
+										icon: 'success'
+									})
+									setTimeout(() => {
+										this.$pageTo({
+											url: '/pages/tabbar/order',
+											type: 'reLaunch'
+										})
+									}, 1500)
 								})
 							},
 							fail: err => {
+								uni.hideLoading()
 								uni.showToast({
 									title: '支付失败',
 									icon: 'none'
 								})
-							},
-							complete: () => {
-								uni.hideLoading()
 								setTimeout(() => {
 									this.$pageTo({
 										url: '/pages/tabbar/order',
@@ -881,6 +894,21 @@
 							icon: 'none'
 						})
 					}
+				})
+			},
+			
+			changeOrderStatus (order_hash) {
+				return new Promise((resolve, reject) => {
+					const api = `/wechat/payment-notify/${order_hash}`
+					this.$myRequest({api}).then(res => {
+						if (res.data.err_code === 0) {
+							resolve(res)
+						} else {
+							reject(res)
+						}
+					}).catch(err => {
+						reject(err)
+					})
 				})
 			}
 		}

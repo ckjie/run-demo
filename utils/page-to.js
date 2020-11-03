@@ -27,7 +27,7 @@ export default {
 				return
 			}
 			// 目标路径为需授权路径，重定向至授权页
-			uni.redirectTo({
+			uni.navigateTo({
 				url: '/pages/user/auth'
 			})
 		}

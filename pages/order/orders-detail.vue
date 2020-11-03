@@ -107,8 +107,8 @@
 		</view>
 		
 		<view v-if="['1', '2'].includes(detail.status)" class="flex btn-list">
-			<view v-if="detail.status === '1'" class="btn-item" @tap="grabOrder">抢单</view>
-			<view v-else-if="detail.status === '2'" class="btn-item" @tap="isService">送达</view>
+			<view v-if="detail.status === '1'" class="btn-item" hover-class="hover-btn" @tap="grabOrder">抢单</view>
+			<view v-else-if="detail.status === '2'" class="btn-item" hover-class="hover-btn" @tap="isService">送达</view>
 		</view>
 	</view>
 </template>
@@ -122,9 +122,24 @@
 		},
 		
 		onLoad (params) {
-			console.log(params, 'ppp')
-			this.order_hash = params.order_hash
-			this.getDetail()
+			uni.getLocation({
+				type: 'gcj02',
+				success: res => {
+					this.order_hash = params.order_hash
+					this.getDetail()
+				},
+				fail: err => {
+					uni.showToast({
+						title: '地理位置授权失败，请在个人中心设置中打开授权',
+						icon: 'none'
+					})
+					setTimeout(() => {
+						uni.navigateBack({
+							delta: 1
+						})
+					}, 1500)
+				}
+			})
 		},
 		
 		methods: {
@@ -227,6 +242,19 @@
 							title: '抢单成功'
 						})
 						this.getDetail()
+						getApp().globalData.timers.set(this.detail.order_hash, setInterval(() => {
+							uni.getLocation({
+								type: 'gcj02',
+								success: res => {
+									const obj = {
+										order_hash: this.detail.order_hash,
+										longitude: res.longitude,
+										latitude: res.latitude,
+									}
+									this.setLocation(obj)
+								}
+							})
+						}, 12000))
 					} else {
 						uni.showToast({
 							title: '抢单失败，请重试',
@@ -257,6 +285,8 @@
 									uni.showToast({
 										title: '送达成功'
 									})
+									clearInterval(getApp().globalData.timers.get(this.detail.order_hash))
+									getApp().globalData.timers.set(this.detail.order_hash, '')
 									setTimeout(() => {
 										this.getDetail()
 									}, 1000)

@@ -3,7 +3,6 @@ import { login } from './auth.js'
 export default {
 	install (Vue, options) {
 		Vue.prototype.$myRequest = ({api, params, methods = 'POST'}) => {
-			// const {api, params, methods} = arguments
 			return new Promise((resolve, reject) => {
 				const token = uni.getStorageSync('token')
 				if (!token) {

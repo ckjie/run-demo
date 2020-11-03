@@ -38,7 +38,7 @@
 			toPage (item) {
 				this.$pageTo({
 					url: item.path,
-					type: 'reLaunch'
+					type: 'redirectTo'
 				})
 			}
 		}

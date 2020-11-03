@@ -5,11 +5,12 @@
 </template>
 
 <script>
+	import uploadImage from '@/common/ossutil/uploadFile.js'
 	export default {
 		props: {
 			count: {
 				type: [String, Number],
-				default: 9
+				default: 1
 			}
 		},
 		
@@ -24,7 +25,21 @@
 				uni.chooseImage({
 					count: this.count,
 					success: res => {
-						this.$emit('uploadSucess', res.tempFilePaths)
+						const list = []
+						uni.showLoading({
+							title: '上传中...'
+						})
+						res.tempFilePaths.forEach((item, idx) => {
+							uploadImage(item, 'images/', result => {
+								list.push(result)
+								if (idx === res.tempFilePaths.length - 1) {
+									uni.hideLoading()
+									this.$emit('uploadSucess', list)
+								}
+							}, err => {
+								uni.hideLoading()
+							})
+						})
 					}
 				})
 			}

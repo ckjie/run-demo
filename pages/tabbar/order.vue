@@ -1,6 +1,6 @@
 <template>
 	<view class="page page-bgc">
-		<v-tabs v-model="current" :fixed="true" :tabs="tabs" :field="'label'" :activeColor="'#0CD6A6'" :lineColor="'#0CD6A6'"></v-tabs>
+		<v-tabs v-model="current" :fixed="true" :tabs="tabs" :scroll="false" :field="'label'" :activeColor="'#0CD6A6'" :lineColor="'#0CD6A6'"></v-tabs>
 		<swiper class="swiper" style="height: 100%;" @change='scollSwiper' :current='current'>
 			<swiper-item v-for="(item,index) in tabs" :key='index'>
 					<!-- 使用 scroll-view 来滚动内容区域 -->
@@ -107,12 +107,12 @@
 				status: 'more',
 				tabs: [
 					{ key: 'all', label: '全部', list: [] },
-					{ key: '0', label: '待支付', list: [] },
+					// { key: '0', label: '待支付', list: [] },
 					{ key: '1', label: '待接单', list: [] },
 					{ key: '2', label: '已接单', list: [] },
-					{ key: '3', label: '已送达', list: [] },
-					{ key: '4', label: '已完成', list: [] },
-					{ key: '5', label: '已取消', list: [] },
+					// { key: '3', label: '已送达', list: [] },
+					// { key: '4', label: '已完成', list: [] },
+					// { key: '5', label: '已取消', list: [] },
 					{ key: '6', label: '已退款', list: [] }
 				],
 				page: 1,
@@ -179,15 +179,16 @@
 							signType: data.signType,
 							paySign: data.paySign,
 							success: res2 => {
-								uni.hideLoading()
-								uni.showToast({
-									title: '支付成功',
-									icon: 'success'
+								this.changeOrderStatus(data.order_hash).then(result => {
+									uni.hideLoading()
+									uni.showToast({
+										title: '支付成功'
+									})
+									this.tabs[this.current].list.splice(0)
+									this.page = 1
+									this.status = 'more'
+									this.getList()
 								})
-								this.tabs[this.current].list.splice(0)
-								this.page = 1
-								this.status = 'more'
-								this.getList()
 							},
 							fail: err => {
 								uni.hideLoading()
@@ -241,6 +242,21 @@
 							})
 						}
 					}
+				})
+			},
+			
+			changeOrderStatus (order_hash) {
+				return new Promise((resolve, reject) => {
+					const api = `/wechat/payment-notify/${order_hash}`
+					this.$myRequest({api}).then(res => {
+						if (res.data.err_code === 0) {
+							resolve(res)
+						} else {
+							reject(res)
+						}
+					}).catch(err => {
+						reject(err)
+					})
 				})
 			},
 			

@@ -57,6 +57,9 @@
 						<view v-if="Number(current) === 0" class="flex btn-list">
 							<view class="btn-item" @tap.stop="grabOrder(child)">抢单</view>
 						</view>
+						<view v-if="Number(current) === 1 && child.status === '2'" class="flex btn-list">
+							<view class="btn-item" @tap.stop="isService(child)">送达</view>
+						</view>
 					</view>
 					<uni-load-more :status="status" iconSize="20"></uni-load-more>
 				</scroll-view>
@@ -150,7 +153,23 @@
 		},
 		
 		onLoad() {
-			this.getList()
+			uni.getLocation({
+				type: 'gcj02',
+				success: res => {
+					this.getList()
+				},
+				fail: err => {
+					uni.showToast({
+						title: '地理位置授权失败，请在个人中心设置中打开授权',
+						icon: 'none'
+					})
+					setTimeout(() => {
+						uni.navigateBack({
+							delta: 1
+						})
+					}, 1500)
+				}
+			})
 		},
 		
 		methods: {
@@ -231,16 +250,80 @@
 						this.tabs[this.current].list.splice(0)
 						this.page = 1
 						this.status = 'more'
-						if (+this.current === 0) {
-							this.getList()
-						} else {
-							this.getList2()
-						}
+						this.getList()
+						getApp().globalData.timers.set(item.order_hash, setInterval(() => {
+							uni.getLocation({
+								type: 'gcj02',
+								success: res => {
+									const obj = {
+										order_hash: item.order_hash,
+										longitude: res.longitude,
+										latitude: res.latitude,
+									}
+									this.setLocation(obj)
+								}
+							})
+						}, 12000))
 					} else {
 						uni.showToast({
 							title: '抢单失败，请重试',
 							icon: 'none'
 						})
+					}
+				})
+			},
+			
+			setLocation (agus) {
+				const params = {
+					order_hash: agus.order_hash,
+					params: {
+						longitude: agus.longitude,
+						latitude: agus.latitude,
+					}
+				}
+				this.$myRequest({
+					api: '/api/order/add-track-log',
+					params
+				}).then(res => {
+					console.log(res, 'rrr')
+				})
+			},
+			
+			isService (item) {
+				uni.showModal({
+					content: '是否确认送达？',
+					confirmColor: '#0CD6A6',
+					success: res => {
+						if (res.confirm) {
+							uni.showLoading({
+								title: '操作中...'
+							})
+							this.$myRequest({
+								api: '/api/order/deliver',
+								methods: 'GET',
+								params: {
+									order_hash: item.order_hash
+								}
+							}).then(res => {
+								uni.hideLoading()
+								if (res.data.err_code === 0) {
+									uni.showToast({
+										title: '送达成功'
+									})
+									this.tabs[this.current].list.splice(0)
+									this.page = 1
+									this.status = 'more'
+									clearInterval(getApp().globalData.timers.get(item.order_hash))
+									getApp().globalData.timers.set(item.order_hash, '')
+									this.getList2()
+								} else {
+									uni.showToast({
+										title: '操作失败，请重试',
+										icon: 'none'
+									})
+								}
+							})
+						}
 					}
 				})
 			},

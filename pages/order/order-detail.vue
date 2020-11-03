@@ -1,5 +1,12 @@
 <template>
 	<view class="page page-bgc">
+		<view class="map-module">
+			<map style="width: 100%; height: 600rpx;"
+				:include-points="includePoints"
+				:markers="markers"
+				:controls="controls"
+				@controltap="tapControl"></map>
+		</view>
 		<view v-if="detail.status === '5'" class="status-box">已取消</view>
 		<view class="section">
 			<view class="title">订单状态</view>
@@ -107,8 +114,8 @@
 		</view>
 		
 		<view v-if="['0', '1'].includes(detail.status)" class="flex btn-list">
-			<view v-if="detail.status === '0'" class="btn-item" @tap="carryOnPay">立即支付</view>
-			<view class="btn-item" @tap="cancelOrder">取消订单</view>
+			<view v-if="detail.status === '0'" class="btn-item" hover-class="hover-btn" @tap="carryOnPay">立即支付</view>
+			<view class="btn-item" hover-class="hover-btn" @tap="cancelOrder">取消订单</view>
 		</view>
 	</view>
 </template>
@@ -117,7 +124,13 @@
 	export default {
 		data() {
 			return {
-				detail: {}
+				detail: {},
+				receiptAddress: {},
+				markers: [],
+				includePoints: [],
+				controls: [
+					{ id: 1, position: { left: 16, top: 290, width: 24, height: 24 }, iconPath: '/static/img/refresh.png', clickable: true }
+				]
 			}
 		},
 		
@@ -153,18 +166,99 @@
 						keys.forEach(key => {
 							obj[key] = this.formatTime(obj[key])
 						})
+						const marker = { width: 30, height: 30 }
+						const callout = { fontSize: 14, padding: 10, borderRadius: 6 }
+						this.receiptAddress = obj.params.receiptAddress
 						switch (obj.type) {
 							case '1':
 								typeName = '帮我买'
+								if (obj.params.buyType === 'address') {
+									this.includePoints.push({
+										latitude: obj.params.buyAddress.latitude,
+										longitude: obj.params.buyAddress.longitude
+									})
+									this.markers.push({
+										id: 1,
+										...marker,
+										latitude: obj.params.buyAddress.latitude,
+										longitude: obj.params.buyAddress.longitude,
+										iconPath: '/static/img/address.png',
+										callout: {
+											...callout,
+											content: `购买地址：${obj.params.buyAddress.address}`
+										}
+									})
+								}
 								break
 							case '2':
 								typeName = '代取送'
+								this.includePoints.push({
+									latitude: obj.params.deliverAddress.latitude,
+									longitude: obj.params.deliverAddress.longitude
+								})
+								this.markers.push({
+									id: 1,
+									...marker,
+									latitude: obj.params.deliverAddress.latitude,
+									longitude: obj.params.deliverAddress.longitude,
+									iconPath: '/static/img/address.png',
+									callout: {
+										...callout,
+										content: `取货地址：${obj.params.deliverAddress.address}`
+									}
+								})
 								break
 							case '3':
 								typeName = '帮帮我'
+								Object.prototype.push.apply(this.includePoints, {
+									latitude: obj.params.transactAddress1.latitude,
+									longitude: obj.params.transactAddress1.longitude
+								}, {
+									latitude: obj.params.transactAddress2.latitude,
+									longitude: obj.params.transactAddress2.longitude
+								})
+								Object.prototype.push.apply(this.markers, [
+									{
+										id: 1,
+										...marker,
+										latitude: obj.params.transactAddress1.latitude,
+										longitude: obj.params.transactAddress1.longitude,
+										iconPath: '/static/img/receive.png',
+										callout: {
+											...callout,
+											content: `代办点1：${obj.params.transactAddress1.address}`
+										}
+									},
+									{
+										id: 2,
+										...marker,
+										latitude: obj.params.transactAddress2.latitude,
+										longitude: obj.params.transactAddress2.longitude,
+										iconPath: '/static/img/receive.png',
+										callout: {
+											...callout,
+											content: `代办点2：${obj.params.transactAddress2.address}`
+										}
+									}
+								])
 								break
 							case '4':
 								typeName = '包裹单'
+								this.includePoints.push({
+									latitude: obj.params.pickupAddress.latitude,
+									longitude: obj.params.pickupAddress.longitude
+								})
+								this.markers.push({
+									id: 1,
+									...marker,
+									latitude: obj.params.pickupAddress.latitude,
+									longitude: obj.params.pickupAddress.longitude,
+									iconPath: '/static/img/address.png',
+									callout: {
+										...callout,
+										content: `取件地址：${obj.params.pickupAddress.address}`
+									}
+								})
 								break
 							default:
 								break
@@ -201,12 +295,62 @@
 							default:
 								break
 						}
+						if (['1', '2', '4'].includes(obj.type)) {
+							this.includePoints.push({
+								latitude: obj.params.receiptAddress.latitude,
+								longitude: obj.params.receiptAddress.longitude
+							})
+							this.markers.push({
+								id: 2,
+								...marker,
+								latitude: obj.params.receiptAddress.latitude,
+								longitude: obj.params.receiptAddress.longitude,
+								iconPath: '/static/img/receive.png',
+								callout: {
+									...callout,
+									content: `收货地址：${obj.params.receiptAddress.address}`
+								}
+							})
+						}
 						obj.typeName = typeName
 						obj.statusName = statusName
 						obj.showTime = showTime
 						this.detail = obj
 						console.log(this.detail, 'ddd')
 					}
+				})
+			},
+			
+			tapControl (e) {
+				uni.showLoading({
+					title: '加载中...'
+				})
+				this.$myRequest({
+					api: '/api/order/get-track-log',
+					methods: 'GET',
+					params: {
+						order_hash: this.detail.order_hash
+					}
+				}).then(res => {
+					uni.hideLoading()
+					if (res.data.data) {
+						const data = JSON.parse(res.data.data.params)
+						const idx = this.markers.findIndex(item => item.id === 99)
+						if (~idx) {
+							this.markers[idx].latitude = data.latitude
+							this.markers[idx].longitude = data.longitude
+						} else {
+							this.markers.push({
+								id: 99,
+								width: 30,
+								height: 30,
+								latitude: data.latitude,
+								longitude: data.longitude,
+								iconPath: '/static/img/rider.png',
+							})
+						}
+					}
+					console.log(res, 'rrr')
 				})
 			},
 			
@@ -231,12 +375,15 @@
 							signType: data.signType,
 							paySign: data.paySign,
 							success: res2 => {
-								uni.hideLoading()
-								uni.showToast({
-									title: '支付成功',
-									icon: 'success'
+								this.changeOrderStatus(data.order_hash).then(result => {
+									uni.hideLoading()
+									uni.showToast({
+										title: '支付成功'
+									})
+									setTimeout(() => {
+										this.getDetail()
+									}, 1000)
 								})
-								this.getDetail()
 							},
 							fail: err => {
 								uni.hideLoading()
@@ -292,6 +439,21 @@
 				})
 			},
 			
+			changeOrderStatus (order_hash) {
+				return new Promise((resolve, reject) => {
+					const api = `/wechat/payment-notify/${order_hash}`
+					this.$myRequest({api}).then(res => {
+						if (res.data.err_code === 0) {
+							resolve(res)
+						} else {
+							reject(res)
+						}
+					}).catch(err => {
+						reject(err)
+					})
+				})
+			},
+			
 			formatTime (time) {
 				if (time <= 0) return time
 				const date = new Date(time * 1000)
@@ -308,6 +470,10 @@
 <style lang="scss" scoped>
 .page {
 	padding: 20rpx;
+	.map-module {
+		padding-bottom: 20rpx;
+	}
+	
 	.section {
 		margin-bottom: 20rpx;
 		.title {
@@ -317,7 +483,7 @@
 			/deep/ .uni-list {
 				border-radius: 10rpx;
 				.uni-list-item__content {
-					flex: 1 140rpx;
+					flex: 1 200rpx;
 					flex-shrink: 0;
 				}
 			}

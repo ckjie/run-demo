@@ -24,14 +24,19 @@
 				const userInfo = res.detail.userInfo
 				uni.setStorageSync('userInfo', JSON.stringify(userInfo))
 				if (userInfo) {
+					const user_id = uni.getStorageSync('user_id')
 					this.$myRequest({
 						api: '/api/user/set-property',
 						params: {
 							nickname: userInfo.nickName,
 							avatar: userInfo.avatarUrl,
-							sex: userInfo.gender
+							sex: userInfo.gender + ''
 						}
 					}).then(res => {
+						uni.navigateBack({
+							delta: 1
+						})
+					}).catch(err => {
 						uni.navigateBack({
 							delta: 1
 						})

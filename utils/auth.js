@@ -14,6 +14,7 @@ const login = () => {
 					success: res => {
 						if (res.data.err_code === 0) {
 							uni.setStorageSync('token', res.data.data.token)
+							uni.setStorageSync('user_id', res.data.data.user_id)
 							resolve(res)
 						} else {
 							reject(res)
