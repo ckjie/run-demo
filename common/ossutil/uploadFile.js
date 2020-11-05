@@ -39,8 +39,7 @@ const uploadFile = function (filePath, dir, successc, failc) {
       'policy': policyBase64,
       'OSSAccessKeyId': accessid,
       'signature': signature,
-      'success_action_status': '200',
-			'BucketName': 'it-demo'
+      'success_action_status': '200'
     },
     success: function (res) {
 			console.log(res);
