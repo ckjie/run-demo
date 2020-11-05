@@ -7,7 +7,6 @@ export default {
 				'pages/tabbar/run-errands',// 跑腿tabbar页
 				'pages/order/create-order',// 创建订单页，在点击提交订单前可访问
 				'pages/other/rich',// 富文本页
-				'pages/tabbar/mine',// 用户端-我的
 				'pages/user/auth'//授权页
 			]
 			const userInfo = uni.getStorageSync('userInfo')

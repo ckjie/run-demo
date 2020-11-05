@@ -41,6 +41,14 @@
 			const info = uni.getStorageSync('userInfo')
 			if (info) {
 				this.userInfo = JSON.parse(info)
+			} else {
+				uni.getUserInfo({
+					lang: 'zh_CN',
+					success: res => {
+						uni.setStorageSync('userInfo', res.userInfo)
+						this.userInfo = res.userInfo
+					}
+				})
 			}
 			this.getIdentity()
 		},
@@ -109,32 +117,19 @@
 <style lang="scss" scoped>
 .top {
 	position: relative;
-	background: linear-gradient(to bottom right, #90F4EC, #0CD6A6);
+	background: linear-gradient(to bottom, #007aff, #0CD6A6);
 	height: 300rpx;
 	.info-box {
-		padding-top: 80rpx;
+		padding-top: 60rpx;
 		text-align: center;
 		.avatar {
-			width: 80rpx;
-			height: 80rpx;
+			width: 100rpx;
+			height: 100rpx;
 			border-radius: 50%;
 			background-color: $uni-color-main;
 			margin: 0 auto 20rpx;
 			/deep/ .img {
 				border-radius: 50%;
-			}
-		}
-	}
-	.setting {
-		position: absolute;
-		top: 20rpx;
-		right: 10rpx;
-		.icon-item {
-			padding: 0 10rpx;
-			background-color: unset;
-			line-height: unset;
-			&::after {
-				display: none;
 			}
 		}
 	}

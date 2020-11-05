@@ -89,11 +89,13 @@
 
 <style lang="scss" scoped>
 .list {
-	padding: 20rpx 20rpx 120rpx;
+	padding: 20rpx 0 120rpx;
 	.menu-item {
 		margin-bottom: 30rpx;
+		padding: 0 20rpx 20rpx;
 		display: flex;
 		align-items: flex-start;
+		border-bottom: 1px solid #F0F0F0;
 		.avatar {
 			width: 80rpx;
 			height: 80rpx;

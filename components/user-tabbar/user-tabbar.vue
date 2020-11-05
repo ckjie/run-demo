@@ -50,6 +50,7 @@
 		
 		methods: {
 			toPage (item) {
+				if (item.path === this.currentRoute) return
 				this.$pageTo({
 					url: item.path,
 					type: 'reLaunch'
