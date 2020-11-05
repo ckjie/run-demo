@@ -27,7 +27,8 @@
 					success: res => {
 						const list = []
 						uni.showLoading({
-							title: '上传中...'
+							title: '上传中...',
+							mask: true
 						})
 						res.tempFilePaths.forEach((item, idx) => {
 							uploadImage(item, 'images/', result => {

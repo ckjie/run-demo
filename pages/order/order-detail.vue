@@ -1,6 +1,6 @@
 <template>
 	<view class="page page-bgc">
-		<view class="map-module">
+		<view v-if="detail.status === '2'" class="map-module">
 			<map style="width: 100%; height: 600rpx;"
 				:include-points="includePoints"
 				:markers="markers"
@@ -8,6 +8,7 @@
 				@controltap="tapControl"></map>
 		</view>
 		<view v-if="detail.status === '5'" class="status-box">已取消</view>
+		<view v-if="detail.status === '6'" class="status-box">已退款</view>
 		<view class="section">
 			<view class="title">订单状态</view>
 			<view class="detail">
@@ -88,7 +89,7 @@
 					</block>
 					<uni-list-item title="订单号" :rightText="detail.order_hash" :showArrow="false"></uni-list-item>
 					<uni-list-item title="收货码" :rightText="detail.code" :showArrow="false"></uni-list-item>
-					<uni-list-item title="支付方式" :rightText="detail.pay_at > 0 ? '微信支付' : '未支付'" :showArrow="false"></uni-list-item>
+					<uni-list-item title="支付方式" :rightText="detail.pay_at === '0' ? '待支付' : '微信支付'" :showArrow="false"></uni-list-item>
 					<block v-if="detail.params.otherRequest">
 						<uni-list-item title="其他要求" :rightText="detail.params.otherRequest" :showArrow="false"></uni-list-item>
 					</block>
@@ -109,6 +110,25 @@
 							<uni-list-item :title="item.title" :rightText="item.value.title + ' -￥' + item.value.price" :showArrow="false"></uni-list-item>
 						</block>
 					</block>
+					<block v-if="detail.params.sound">
+						<view class="flex file-box sound-module">
+							<view>录音</view>
+							<view class="flex sound-box" hover-class="hover-btn" @tap="playSound">
+								<view class="duration">{{ detail.params.duration }}'</view>
+								<uni-icons type="sound" size="14"></uni-icons>
+							</view>
+						</view>
+					</block>
+					<block v-if="detail.params.picList">
+						<view class="flex file-box pic-module">
+							<view class="title">图片</view>
+							<view class="flex pic-box">
+								<view class="pic-item" v-for="(item, idx) in detail.params.picList" :key="item">
+									<image :src="item" mode="aspectFill" @tap="previewPicItem(idx, detail.params.picList)"></image>
+								</view>
+							</view>
+						</view>
+					</block>
 				</uni-list>
 			</view>
 		</view>
@@ -121,6 +141,10 @@
 </template>
 
 <script>
+	import { getDistance } from '@/utils/getDistance.js'
+	
+	const innerAudioContext = uni.createInnerAudioContext()
+	
 	export default {
 		data() {
 			return {
@@ -128,6 +152,8 @@
 				receiptAddress: {},
 				markers: [],
 				includePoints: [],
+				marker: { width: 30, height: 30 },
+				callout: { fontSize: 14, padding: 10, borderRadius: 6 },
 				controls: [
 					{ id: 1, position: { left: 16, top: 290, width: 24, height: 24 }, iconPath: '/static/img/refresh.png', clickable: true }
 				]
@@ -135,7 +161,6 @@
 		},
 		
 		onLoad (params) {
-			console.log(params, 'ppp')
 			this.order_hash = params.order_hash
 			this.getDetail()
 		},
@@ -143,7 +168,8 @@
 		methods: {
 			getDetail () {
 				uni.showLoading({
-					title: '加载中...'
+					title: '加载中...',
+					mask: true
 				})
 				this.$myRequest({
 					api: '/api/order/one',
@@ -166,8 +192,6 @@
 						keys.forEach(key => {
 							obj[key] = this.formatTime(obj[key])
 						})
-						const marker = { width: 30, height: 30 }
-						const callout = { fontSize: 14, padding: 10, borderRadius: 6 }
 						this.receiptAddress = obj.params.receiptAddress
 						switch (obj.type) {
 							case '1':
@@ -179,12 +203,12 @@
 									})
 									this.markers.push({
 										id: 1,
-										...marker,
+										...this.marker,
 										latitude: obj.params.buyAddress.latitude,
 										longitude: obj.params.buyAddress.longitude,
 										iconPath: '/static/img/address.png',
 										callout: {
-											...callout,
+											...this.callout,
 											content: `购买地址：${obj.params.buyAddress.address}`
 										}
 									})
@@ -198,12 +222,12 @@
 								})
 								this.markers.push({
 									id: 1,
-									...marker,
+									...this.marker,
 									latitude: obj.params.deliverAddress.latitude,
 									longitude: obj.params.deliverAddress.longitude,
 									iconPath: '/static/img/address.png',
 									callout: {
-										...callout,
+										...this.callout,
 										content: `取货地址：${obj.params.deliverAddress.address}`
 									}
 								})
@@ -220,23 +244,23 @@
 								Object.prototype.push.apply(this.markers, [
 									{
 										id: 1,
-										...marker,
+										...this.marker,
 										latitude: obj.params.transactAddress1.latitude,
 										longitude: obj.params.transactAddress1.longitude,
 										iconPath: '/static/img/receive.png',
 										callout: {
-											...callout,
+											...this.callout,
 											content: `代办点1：${obj.params.transactAddress1.address}`
 										}
 									},
 									{
 										id: 2,
-										...marker,
+										...this.marker,
 										latitude: obj.params.transactAddress2.latitude,
 										longitude: obj.params.transactAddress2.longitude,
 										iconPath: '/static/img/receive.png',
 										callout: {
-											...callout,
+											...this.callout,
 											content: `代办点2：${obj.params.transactAddress2.address}`
 										}
 									}
@@ -250,12 +274,12 @@
 								})
 								this.markers.push({
 									id: 1,
-									...marker,
+									...this.marker,
 									latitude: obj.params.pickupAddress.latitude,
 									longitude: obj.params.pickupAddress.longitude,
 									iconPath: '/static/img/address.png',
 									callout: {
-										...callout,
+										...this.callout,
 										content: `取件地址：${obj.params.pickupAddress.address}`
 									}
 								})
@@ -302,12 +326,12 @@
 							})
 							this.markers.push({
 								id: 2,
-								...marker,
+								...this.marker,
 								latitude: obj.params.receiptAddress.latitude,
 								longitude: obj.params.receiptAddress.longitude,
 								iconPath: '/static/img/receive.png',
 								callout: {
-									...callout,
+									...this.callout,
 									content: `收货地址：${obj.params.receiptAddress.address}`
 								}
 							})
@@ -315,15 +339,19 @@
 						obj.typeName = typeName
 						obj.statusName = statusName
 						obj.showTime = showTime
+						obj.params.picList && (obj.params.picList = JSON.parse(obj.params.picList))
+						obj.params.sound && (innerAudioContext.src = obj.params.sound)
 						this.detail = obj
-						console.log(this.detail, 'ddd')
+						console.log(this.detail.params, 'pp')
+						obj.status === '2' && this.tapControl()
 					}
 				})
 			},
 			
 			tapControl (e) {
 				uni.showLoading({
-					title: '加载中...'
+					title: '加载中...',
+					mask: true
 				})
 				this.$myRequest({
 					api: '/api/order/get-track-log',
@@ -336,9 +364,14 @@
 					if (res.data.data) {
 						const data = JSON.parse(res.data.data.params)
 						const idx = this.markers.findIndex(item => item.id === 99)
+						// 距离
+						let distance = getDistance(data.latitude, data.longitude, this.receiptAddress.latitude, this.receiptAddress.longitude)
+						distance = distance > 1 ? distance.toFixed(2) + '公里' : Math.round(distance * 1000) + '米'
+						const title = this.detail.type === '3' ? '代办点2' : '收货地'
 						if (~idx) {
 							this.markers[idx].latitude = data.latitude
 							this.markers[idx].longitude = data.longitude
+							this.markers[idx].callout.content = '骑手\n' + `距${title}约${distance}`
 						} else {
 							this.markers.push({
 								id: 99,
@@ -347,16 +380,20 @@
 								latitude: data.latitude,
 								longitude: data.longitude,
 								iconPath: '/static/img/rider.png',
+								callout: {
+									...this.callout,
+									content: '骑手\n' + `距${title}约${distance}`
+								}
 							})
 						}
 					}
-					console.log(res, 'rrr')
 				})
 			},
 			
 			carryOnPay () {
 				uni.showLoading({
-					title: '操作中...'
+					title: '操作中...',
+					mask: true
 				})
 				this.$myRequest({
 					api: '/api/order/pay-order',
@@ -410,7 +447,8 @@
 					success: res => {
 						if (res.confirm) {
 							uni.showLoading({
-								title: '操作中...'
+								title: '操作中...',
+								mask: true
 							})
 							this.$myRequest({
 								api: '/api/order/cancel',
@@ -454,6 +492,21 @@
 				})
 			},
 			
+			playSound () {
+				if (innerAudioContext.paused) {
+					innerAudioContext.play()
+				} else {
+					innerAudioContext.stop()
+				}
+			},
+			
+			previewPicItem (idx, list) {
+				uni.previewImage({
+					current: idx || 0,
+					urls: list
+				})
+			},
+			
 			formatTime (time) {
 				if (time <= 0) return time
 				const date = new Date(time * 1000)
@@ -490,6 +543,45 @@
 		}
 	}
 	
+	.file-box {
+		background-color: #FFFFFF;
+		padding: 10rpx 30rpx;
+		padding-left: 15px;
+	}
+	.sound-module {
+		justify-content: space-between;
+		.sound-box {
+			padding: 6rpx 20rpx;
+			border: 1px solid #CCCCCC;
+			border-radius: 10rpx;
+			.duration {
+				font-size: 24rpx;
+				margin-right: 16rpx;
+			}
+		}
+	}
+	.pic-module {
+		.title {
+			margin-right: 40rpx;
+			flex-shrink: 0;
+			padding: 0;
+		}
+		.pic-box {
+			flex-wrap: wrap;
+			margin-left: auto;
+			.pic-item {
+				width: 120rpx; height: 120rpx;
+				margin: 16rpx 0;
+				border-radius: 10rpx;
+				margin-right: 20rpx;
+				image {
+					width: 100%;
+					height: 100%;
+				}
+			}
+		}
+	}
+	
 	.btn-list {
 		padding-bottom: 20rpx;
 		.btn-item {
@@ -501,6 +593,7 @@
 			border: 1px solid #F0F0F0;
 			overflow: hidden;
 			color: $uni-color-main;
+			background-color: #FFFFFF;
 		}
 	}
 	.status-box {

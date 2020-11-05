@@ -60,7 +60,6 @@
 		onLoad(params) {
 			if (params.item) {
 				params.item = JSON.parse(decodeURIComponent(params.item))
-				console.log(params.item)
 				const address = params.item.address.split(' ')
 				this.detail = Object.assign({}, this.detail, {
 					...params.item,
@@ -106,7 +105,8 @@
 			save () {
 				if (!this.checkData()) return
 				uni.showLoading({
-					title: '保存中...'
+					title: '保存中...',
+					mask: true
 				})
 				const address = `${this.detail.location} ${this.detail.address}`
 				let api = '/api/address/create'
@@ -144,7 +144,8 @@
 					success: res => {
 						if (res.confirm) {
 							uni.showLoading({
-								title: '删除中...'
+								title: '删除中...',
+								mask: true
 							})
 							this.$myRequest({
 								api: '/api/address/delete',

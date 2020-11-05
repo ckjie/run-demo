@@ -160,7 +160,8 @@
 			
 			carryOnPay (item) {
 				uni.showLoading({
-					title: '操作中...'
+					title: '操作中...',
+					mask: true
 				})
 				this.$myRequest({
 					api: '/api/order/pay-order',
@@ -215,7 +216,8 @@
 					success: res => {
 						if (res.confirm) {
 							uni.showLoading({
-								title: '操作中...'
+								title: '操作中...',
+								mask: true
 							})
 							this.$myRequest({
 								api: '/api/order/cancel',

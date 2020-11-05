@@ -442,13 +442,10 @@
 				title: this.titleSource[params.key] || '跑腿王'
 			})
 			recorderManager.onStop(res => {
-				console.log(res.tempFilePath, 'res.tempFilePath')
 				uploadImage(res.tempFilePath, 'sound/', result => {
 					this.formData.sound = result
-					console.log(result, 'result')
 					this.formData.duration = Math.ceil(res.duration / 1000)
 					innerAudioContext.src = this.formData.sound
-					console.log(this.formData.sound, 'this.formData.sound')
 				})
 			});
 			
@@ -638,7 +635,6 @@
 			
 			changeBuyType (val) {
 				this.formData.buyType = val
-				console.log(val, this.formData.buyType)
 			},
 			
 			clickAttach (item, key) {

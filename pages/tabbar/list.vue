@@ -28,31 +28,31 @@
 						<block v-if="child.type === '1'">
 							<view class="flex content">
 								<view class="label">购买地址</view>
-								<view class="detail">{{ child.params.buyType === 'address' ? child.params.buyAddress.address : '就近购买' }}</view>
+								<view class="detail">{{ child.params.buyType === 'address' ? child.params.buyAddress.address : '就近购买' }} <text v-if="current === 0 && child.params.buyType === 'address' && child.params.buyAddress" class="distance">（距离：{{ locationDistance(child.params.buyAddress) }})</text></view>
 							</view>
 						</block>
 						<block v-if="child.type === '2' && child.params.deliverAddress">
 							<view class="flex content">
 								<view class="label">取货地址</view>
-								<view class="detail">{{child.params.deliverAddress.address}}</view>
+								<view class="detail">{{child.params.deliverAddress.address}} <text v-if="current === 0" class="distance">（距离：{{ locationDistance(child.params.deliverAddress) }})</text></view>
 							</view>
 						</block>
 						<block v-if="child.type === '3'">
 							<view class="flex content">
 								<view class="label">代办点</view>
-								<view class="detail">{{child.params.transactAddress1.address}}</view>
+								<view class="detail">{{child.params.transactAddress1.address}} <text v-if="current === 0" class="distance">（距离：{{ locationDistance(child.params.transactAddress1) }})</text></view>
 							</view>
 						</block>
 						<block v-if="child.type === '4'">
 							<view class="flex content">
 								<view class="label">取件地址</view>
-								<view class="detail">{{child.params.pickupAddress.address}}</view>
+								<view class="detail">{{child.params.pickupAddress.address}} <text v-if="current === 0" class="distance">（距离：{{ locationDistance(child.params.pickupAddress) }})</text></view>
 							</view>
 						</block>
 						<view class="flex content">
 							<view class="label">收货地址</view>
-							<view v-if="['1', '2', '4'].includes(child.type)" class="detail">{{child.params.receiptAddress.address}}</view>
-							<view v-else class="detail">{{child.params.transactAddress2.address}}</view>
+							<view v-if="['1', '2', '4'].includes(child.type)" class="detail">{{child.params.receiptAddress.address}} <text v-if="current === 0" class="distance">（距离：{{ locationDistance(child.params.receiptAddress) }})</text></view>
+							<view v-else class="detail">{{child.params.transactAddress2.address}} <text v-if="current === 0" class="distance">（距离：{{ locationDistance(child.params.transactAddress2) }})</text></view>
 						</view>
 						<view v-if="Number(current) === 0" class="flex btn-list">
 							<view class="btn-item" @tap.stop="grabOrder(child)">抢单</view>
@@ -71,6 +71,7 @@
 
 <script>
 	import riderTabbar from '@/components/rider-tabbar/rider-tabbar.vue'
+	import { getDistance } from '@/utils/getDistance.js'
 	export default {
 		components: {
 			riderTabbar
@@ -148,7 +149,8 @@
 					{ key: '1', label: '已接单', list: [] }
 				],
 				page: 1,
-				size: 20
+				size: 20,
+				currentLocation: {}
 			}
 		},
 		
@@ -156,6 +158,10 @@
 			uni.getLocation({
 				type: 'gcj02',
 				success: res => {
+					this.currentLocation = Object.assign({}, this.currentLocation, {
+						latitude: res.latitude,
+						longitude: res.longitude
+					})
 					this.getList()
 				},
 				fail: err => {
@@ -185,19 +191,25 @@
 					params
 				}).then(res => {
 					uni.hideLoading()
-					if (res.data.data.length < this.size) {
-						this.status = 'noMore'
-					} else {
-						this.status = 'more'
-					}
-					res.data.data.forEach(item => {
-						item.addition.params = JSON.parse(item.addition.params)
-						item = {
-							...item.addition,
-							...item
+					uni.getLocation({type: 'gcj02'}).then(result => {
+						this.currentLocation = Object.assign({}, this.currentLocation, {
+							latitude: result[1].latitude,
+							longitude: result[1].longitude
+						})
+						if (res.data.data.length < this.size) {
+							this.status = 'noMore'
+						} else {
+							this.status = 'more'
 						}
-						delete item.addition
-						this.tabs[this.current].list.push(item)
+						res.data.data.forEach(item => {
+							item.addition.params = JSON.parse(item.addition.params)
+							item = {
+								...item.addition,
+								...item
+							}
+							delete item.addition
+							this.tabs[this.current].list.push(item)
+						})
 					})
 				})
 			},
@@ -227,8 +239,29 @@
 						}
 						delete item.addition
 						this.tabs[this.current].list.push(item)
+						if (item.status === '2' && !getApp().globalData.timers.get(item.order_hash)) {
+							getApp().globalData.timers.set(item.order_hash, setInterval(() => {
+								uni.getLocation({
+									type: 'gcj02',
+									success: res => {
+										const obj = {
+											order_hash: item.order_hash,
+											longitude: res.longitude,
+											latitude: res.latitude,
+										}
+										this.setLocation(obj)
+									}
+								})
+							}, 12000))
+						}
 					})
 				})
+			},
+			
+			locationDistance (row) {
+				let distance = getDistance(this.currentLocation.latitude, this.currentLocation.longitude, row.latitude, row.longitude)
+				distance = distance > 1 ? distance.toFixed(2) + '公里' : Math.round(distance * 1000) + '米'
+				return distance
 			},
 			
 			grabOrder (item) {
@@ -284,9 +317,7 @@
 				this.$myRequest({
 					api: '/api/order/add-track-log',
 					params
-				}).then(res => {
-					console.log(res, 'rrr')
-				})
+				}).then(res => {})
 			},
 			
 			isService (item) {
@@ -409,6 +440,9 @@ page {
 			.label {
 				flex-shrink: 0;
 				margin-right: 30rpx;
+			}
+			.distance {
+				color: $uni-color-error;
 			}
 		}
 		.btn-list {

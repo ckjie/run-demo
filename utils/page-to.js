@@ -10,9 +10,6 @@ export default {
 				'pages/tabbar/mine',// 用户端-我的
 				'pages/user/auth'//授权页
 			]
-			// uni[type] ({
-			// 	url
-			// })
 			const userInfo = uni.getStorageSync('userInfo')
 			if (userInfo) {
 				uni[type] ({
@@ -26,9 +23,22 @@ export default {
 				})
 				return
 			}
-			// 目标路径为需授权路径，重定向至授权页
-			uni.navigateTo({
-				url: '/pages/user/auth'
+			// 目标路径为需授权路径，判断是否需跳转至授权页
+			uni.getSetting({
+				success: res => {
+					if (!res.authSetting['scope.userInfo']) {
+						uni.navigateTo({
+							url: '/pages/user/auth'
+						})
+					} else {
+						uni.getUserInfo({
+							lang: 'zh_CN',
+							success: res => {
+								uni.setStorageSync('userInfo', res.userInfo)
+							}
+						})
+					}
+				}
 			})
 		}
 	}

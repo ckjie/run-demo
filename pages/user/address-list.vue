@@ -51,7 +51,8 @@
 		methods: {
 			getList () {
 				uni.showLoading({
-					title: '加载中...'
+					title: '加载中...',
+					mask: true
 				})
 				this.addressList.splice(0)
 				const params = {

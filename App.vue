@@ -29,7 +29,7 @@ view {
 }
 .page-bgc {
 	width: 100%;
-	height: 100%;
+	min-height: 100%;
 	background-color: #F8F8F8;
 }
 .flex {

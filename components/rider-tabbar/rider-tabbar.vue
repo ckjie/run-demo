@@ -2,7 +2,7 @@
 	<view class="tabbar">
 		<view class="list">
 			<view class="item" v-for="(item, idx) in list" :key="idx" @tap="toPage(item)">
-				<image class="icon" :src="item.icon" mode="aspectFit"></image>
+				<image class="icon" :src="item.path === currentRoute ? item.icon_1 : item.icon_0" mode="aspectFit"></image>
 				<view class="title" :class="{'active-title': item.path === currentRoute}">{{ item.title }}</view>
 			</view>
 		</view>
@@ -16,12 +16,14 @@
 				currentRoute: '',
 				list: [
 					{
-						icon: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1601991478011&di=1a95f56a96d3c30da6a8fdb3befbbb9e&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20181207%2Fab2c053183994bb8bdddd716da413ad8.jpeg',
+						icon_0: require('@/static/img/list_0.png'),
+						icon_1: require('@/static/img/list_1.png'),
 						title: '菜单',
 						path: '/pages/tabbar/list'
 					},
 					{
-						icon: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1601991478011&di=1a95f56a96d3c30da6a8fdb3befbbb9e&imgtype=0&src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20181207%2Fab2c053183994bb8bdddd716da413ad8.jpeg',
+						icon_0: require('@/static/img/user_0.png'),
+						icon_1: require('@/static/img/user_1.png'),
 						title: '我的',
 						path: '/pages/tabbar/rider'
 					}
@@ -80,9 +82,10 @@
 				}
 				.title {
 					font-size: 24rpx;
+					color: $uni-text-color-grey;
 				}
 				.active-title {
-					color: $uni-color-primary;
+					color: $uni-color-main;
 				}
 			}
 		}

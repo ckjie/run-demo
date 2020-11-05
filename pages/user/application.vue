@@ -62,7 +62,6 @@
 		},
 		methods: {
 			uploadSucess (list) {
-				console.log(list, 'lll')
 				this.formData.avatar = list[0]
 			},
 			
@@ -88,7 +87,8 @@
 			submit () {
 				if (!this.checkData()) return
 				uni.showLoading({
-					title: '提交中...'
+					title: '提交中...',
+					mask: true
 				})
 				const params = {
 					api: '/api/courier/apply',

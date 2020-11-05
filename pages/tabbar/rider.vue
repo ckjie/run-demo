@@ -10,7 +10,7 @@
 		</view>
 		<view class="menus">
 			<uni-list>
-				<uni-list-item title="成为骑手" showExtraIcon="true" :extraIcon="{ color: '#999', size: '16', type: 'contact-filled' }" @tap="relaunchPage('/pages/user/application')"></uni-list-item>
+				<!-- <uni-list-item title="成为骑手" showExtraIcon="true" :extraIcon="{ color: '#999', size: '16', type: 'contact-filled' }" @tap="relaunchPage('/pages/user/application')"></uni-list-item> -->
 				<button class="btn-item" open-type="contact">
 					<uni-list-item title="帮助" showExtraIcon="true" :extraIcon="{ color: '#999', size: '16', type: 'help-filled' }"></uni-list-item>
 				</button>
@@ -60,7 +60,7 @@
 <style lang="scss" scoped>
 .top {
 	position: relative;
-	// background-color: red;
+	background: linear-gradient(to bottom right, #90F4EC, #0CD6A6);
 	height: 300rpx;
 	.info-box {
 		padding-top: 80rpx;

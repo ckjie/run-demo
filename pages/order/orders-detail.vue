@@ -1,5 +1,10 @@
 <template>
 	<view class="page page-bgc">
+		<view v-if="['1', '2'].includes(detail.status)" class="map-module">
+			<map style="width: 100%; height: 600rpx;"
+				:include-points="includePoints"
+				:markers="markers"></map>
+		</view>
 		<view v-if="detail.status === '3'" class="status-box">已送达</view>
 		<view class="section">
 			<view class="title">订单状态</view>
@@ -102,6 +107,25 @@
 							<uni-list-item :title="item.title" :rightText="item.value.title + ' -￥' + item.value.price" :showArrow="false"></uni-list-item>
 						</block>
 					</block>
+					<block v-if="detail.params.sound">
+						<view class="flex file-box sound-module">
+							<view>录音</view>
+							<view class="flex sound-box" hover-class="hover-btn" @tap="playSound">
+								<view class="duration">{{ detail.params.duration }}'</view>
+								<uni-icons type="sound" size="14"></uni-icons>
+							</view>
+						</view>
+					</block>
+					<block v-if="detail.params.picList">
+						<view class="flex file-box pic-module">
+							<view class="title">图片</view>
+							<view class="flex pic-box">
+								<view class="pic-item" v-for="(item, idx) in detail.params.picList" :key="item">
+									<image :src="item" mode="aspectFill" @tap="previewPicItem(idx, detail.params.picList)"></image>
+								</view>
+							</view>
+						</view>
+					</block>
 				</uni-list>
 			</view>
 		</view>
@@ -114,10 +138,20 @@
 </template>
 
 <script>
+	import { getDistance } from '@/utils/getDistance.js'
+	
+	const innerAudioContext = uni.createInnerAudioContext()
+	
 	export default {
 		data() {
 			return {
-				detail: {}
+				detail: {},
+				receiptAddress: {},
+				markers: [],
+				includePoints: [],
+				marker: { width: 30, height: 30 },
+				callout: { fontSize: 14, padding: 10, borderRadius: 6 },
+				currentLocation: {}
 			}
 		},
 		
@@ -126,6 +160,26 @@
 				type: 'gcj02',
 				success: res => {
 					this.order_hash = params.order_hash
+					this.currentLocation = Object.assign({}, this.currentLocation, {
+						longitude: res.longitude,
+						latitude: res.latitude
+					})
+					this.includePoints.push({
+						latitude: res.latitude,
+						longitude: res.longitude
+					})
+					this.markers.push({
+						id: 99,
+						width: 30,
+						height: 30,
+						latitude: res.latitude,
+						longitude: res.longitude,
+						iconPath: '/static/img/location.png',
+						callout: {
+							...this.callout,
+							content: '当前位置'
+						}
+					})
 					this.getDetail()
 				},
 				fail: err => {
@@ -145,7 +199,8 @@
 		methods: {
 			getDetail () {
 				uni.showLoading({
-					title: '加载中...'
+					title: '加载中...',
+					mask: true
 				})
 				this.$myRequest({
 					api: '/api/order/one',
@@ -168,18 +223,107 @@
 						keys.forEach(key => {
 							obj[key] = this.formatTime(obj[key])
 						})
+						this.receiptAddress = obj.params.receiptAddress
 						switch (obj.type) {
 							case '1':
 								typeName = '帮我买'
+								if (obj.params.buyType === 'address') {
+									let distance = getDistance(obj.params.buyAddress.latitude, obj.params.buyAddress.longitude, this.currentLocation.latitude, this.currentLocation.longitude)
+									distance = distance > 1 ? distance.toFixed(2) + '公里' : Math.round(distance * 1000) + '米'
+									this.includePoints.push({
+										latitude: obj.params.buyAddress.latitude,
+										longitude: obj.params.buyAddress.longitude
+									})
+									this.markers.push({
+										id: 1,
+										...this.marker,
+										latitude: obj.params.buyAddress.latitude,
+										longitude: obj.params.buyAddress.longitude,
+										iconPath: '/static/img/address.png',
+										callout: {
+											...this.callout,
+											content: `购买地址：${obj.params.buyAddress.address}` + '\n距离约' + distance
+										}
+									})
+								}
 								break
 							case '2':
 								typeName = '代取送'
+								let distance = getDistance(obj.params.deliverAddress.latitude, obj.params.deliverAddress.longitude, this.currentLocation.latitude, this.currentLocation.longitude)
+								distance = distance > 1 ? distance.toFixed(2) + '公里' : Math.round(distance * 1000) + '米'
+								this.includePoints.push({
+									latitude: obj.params.deliverAddress.latitude,
+									longitude: obj.params.deliverAddress.longitude
+								})
+								this.markers.push({
+									id: 1,
+									...this.marker,
+									latitude: obj.params.deliverAddress.latitude,
+									longitude: obj.params.deliverAddress.longitude,
+									iconPath: '/static/img/address.png',
+									callout: {
+										...this.callout,
+										content: `取货地址：${obj.params.deliverAddress.address}` + '\n距离约' + distance
+									}
+								})
 								break
 							case '3':
 								typeName = '帮帮我'
+								let distance1 = getDistance(obj.params.transactAddress1.latitude, obj.params.transactAddress1.longitude, this.currentLocation.latitude, this.currentLocation.longitude)
+								distance1 = distance1 > 0 ? distance1.toFixed(2) + '公里' : Math.round(distance1 * 1000) + '米'
+								let distance2 = getDistance(obj.params.transactAddress2.latitude, obj.params.transactAddress2.longitude, this.currentLocation.latitude, this.currentLocation.longitude)
+								distance2 = distance2 > 0 ? distance2.toFixed(2) + '公里' : Math.round(distance2 * 1000) + '米'
+								Object.prototype.push.apply(this.includePoints, {
+									latitude: obj.params.transactAddress1.latitude,
+									longitude: obj.params.transactAddress1.longitude
+								}, {
+									latitude: obj.params.transactAddress2.latitude,
+									longitude: obj.params.transactAddress2.longitude
+								})
+								Object.prototype.push.apply(this.markers, [
+									{
+										id: 1,
+										...this.marker,
+										latitude: obj.params.transactAddress1.latitude,
+										longitude: obj.params.transactAddress1.longitude,
+										iconPath: '/static/img/receive.png',
+										callout: {
+											...this.callout,
+											content: `代办点1：${obj.params.transactAddress1.address}` + '\n距离约' + distance1
+										}
+									},
+									{
+										id: 2,
+										...this.marker,
+										latitude: obj.params.transactAddress2.latitude,
+										longitude: obj.params.transactAddress2.longitude,
+										iconPath: '/static/img/receive.png',
+										callout: {
+											...this.callout,
+											content: `代办点2：${obj.params.transactAddress2.address}` + '\n距离约' + distance2
+										}
+									}
+								])
 								break
 							case '4':
 								typeName = '包裹单'
+								let distance3 = getDistance(obj.params.pickupAddress.latitude, obj.params.pickupAddress.longitude, this.currentLocation.latitude, this.currentLocation.longitude)
+								distance3 = distance3 > 0 ? distance3.toFixed(2) + '公里' : Math.round(distance3 * 1000) + '米'
+								this.includePoints.push({
+									latitude: obj.params.pickupAddress.latitude,
+									longitude: obj.params.pickupAddress.longitude
+								})
+								this.markers.push({
+									id: 1,
+									...this.marker,
+									latitude: obj.params.pickupAddress.latitude,
+									longitude: obj.params.pickupAddress.longitude,
+									iconPath: '/static/img/address.png',
+									callout: {
+										...this.callout,
+										content: `取件地址：${obj.params.pickupAddress.address}` + '\n距离约' + distance3
+									}
+								})
 								break
 							default:
 								break
@@ -216,18 +360,42 @@
 							default:
 								break
 						}
+						if (['1', '2', '4'].includes(obj.type)) {
+							let distance = getDistance(obj.params.receiptAddress.latitude, obj.params.receiptAddress.longitude, this.currentLocation.latitude, this.currentLocation.longitude)
+							distance = distance > 1 ? distance.toFixed(2) + '公里' : Math.round(distance * 1000) + '米'
+							this.includePoints.push({
+								latitude: obj.params.receiptAddress.latitude,
+								longitude: obj.params.receiptAddress.longitude
+							})
+							this.markers.push({
+								id: 2,
+								...this.marker,
+								latitude: obj.params.receiptAddress.latitude,
+								longitude: obj.params.receiptAddress.longitude,
+								iconPath: '/static/img/receive.png',
+								callout: {
+									...this.callout,
+									content: `收货地址：${obj.params.receiptAddress.address}` + '\n距离约' + distance
+								}
+							})
+						}
 						obj.typeName = typeName
 						obj.statusName = statusName
 						obj.showTime = showTime
+						obj.params.picList && (obj.params.picList = JSON.parse(obj.params.picList))
+						obj.params.sound && (innerAudioContext.src = obj.params.sound)
 						this.detail = obj
-						console.log(this.detail.pay_at, 'ddd')
+						if (obj.status === '2' && !getApp().globalData.timers.get(obj.order_hash)) {
+							this.setTimer()
+						}
 					}
 				})
 			},
 			
 			grabOrder () {
 				uni.showLoading({
-					title: '操作中...'
+					title: '操作中...',
+					mask: true
 				})
 				this.$myRequest({
 					api: '/api/order/order',
@@ -242,19 +410,6 @@
 							title: '抢单成功'
 						})
 						this.getDetail()
-						getApp().globalData.timers.set(this.detail.order_hash, setInterval(() => {
-							uni.getLocation({
-								type: 'gcj02',
-								success: res => {
-									const obj = {
-										order_hash: this.detail.order_hash,
-										longitude: res.longitude,
-										latitude: res.latitude,
-									}
-									this.setLocation(obj)
-								}
-							})
-						}, 12000))
 					} else {
 						uni.showToast({
 							title: '抢单失败，请重试',
@@ -264,6 +419,63 @@
 				})
 			},
 			
+			setTimer () {
+				getApp().globalData.timers.set(this.detail.order_hash, setInterval(() => {
+					uni.getLocation({
+						type: 'gcj02',
+						success: res => {
+							const obj = {
+								order_hash: this.detail.order_hash,
+								longitude: res.longitude,
+								latitude: res.latitude,
+							}
+							this.markers.forEach(item => {
+								let distance
+								if (item.id === 1) {
+									// 购买、取货地址
+									distance = getDistance(item.latitude, item.longitude, res.latitude, res.longitude)
+									distance = distance > 1 ? distance.toFixed(2) + '公里' : Math.round(distance * 1000) + '米'
+								} else if (item.id === 2) {
+									// 收货地址
+									distance = getDistance(item.latitude, item.longitude, res.latitude, res.longitude)
+									distance = distance > 1 ? distance.toFixed(2) + '公里' : Math.round(distance * 1000) + '米'
+								} else if (item.id === 99) {
+									// 骑手位置
+									item.latitude = res.latitude
+									item.longitude = res.longitude
+								}
+								if (distance) {
+									const idx = item.callout.content.lastIndexOf('距离约')
+									item.callout.content = item.callout.content.slice(0, idx) + '距离约' + distance
+								}
+							})
+							this.includePoints = this.includePoints.filter(item => this.markers.some(child => child.latitude === item.latitude && child.longitude === item.longitude))
+							if (!this.includePoints.some(item => item.latitude === res.latitude && item.longitude === res.longitude)) {
+								this.includePoints.push({
+									latitude: res.latitude,
+									longitude: res.longitude
+								})
+							}
+							this.setLocation(obj)
+						}
+					})
+				}, 12000))
+			},
+			
+			setLocation (agus) {
+				const params = {
+					order_hash: agus.order_hash,
+					params: {
+						longitude: agus.longitude,
+						latitude: agus.latitude,
+					}
+				}
+				this.$myRequest({
+					api: '/api/order/add-track-log',
+					params
+				}).then(res => {})
+			},
+			
 			isService () {
 				uni.showModal({
 					content: '是否确认送达？',
@@ -271,7 +483,8 @@
 					success: res => {
 						if (res.confirm) {
 							uni.showLoading({
-								title: '操作中...'
+								title: '操作中...',
+								mask: true
 							})
 							this.$myRequest({
 								api: '/api/order/deliver',
@@ -302,6 +515,21 @@
 				})
 			},
 			
+			playSound () {
+				if (innerAudioContext.paused) {
+					innerAudioContext.play()
+				} else {
+					innerAudioContext.stop()
+				}
+			},
+			
+			previewPicItem (idx, list) {
+				uni.previewImage({
+					current: idx || 0,
+					urls: list
+				})
+			},
+			
 			formatTime (time) {
 				if (time <= 0) return time
 				const date = new Date(time * 1000)
@@ -329,6 +557,45 @@
 				.uni-list-item__content {
 					flex: 1 140rpx;
 					flex-shrink: 0;
+				}
+			}
+		}
+	}
+	
+	.file-box {
+		background-color: #FFFFFF;
+		padding: 10rpx 30rpx;
+		padding-left: 15px;
+	}
+	.sound-module {
+		justify-content: space-between;
+		.sound-box {
+			padding: 6rpx 20rpx;
+			border: 1px solid #CCCCCC;
+			border-radius: 10rpx;
+			.duration {
+				font-size: 24rpx;
+				margin-right: 16rpx;
+			}
+		}
+	}
+	.pic-module {
+		.title {
+			margin-right: 40rpx;
+			flex-shrink: 0;
+			padding: 0;
+		}
+		.pic-box {
+			flex-wrap: wrap;
+			margin-left: auto;
+			.pic-item {
+				width: 120rpx; height: 120rpx;
+				margin: 16rpx 0;
+				border-radius: 10rpx;
+				margin-right: 20rpx;
+				image {
+					width: 100%;
+					height: 100%;
 				}
 			}
 		}
