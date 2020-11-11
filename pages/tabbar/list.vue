@@ -37,7 +37,7 @@
 								<view class="detail">{{child.params.deliverAddress.address}} <text v-if="current === 0" class="distance">（距离：{{ locationDistance(child.params.deliverAddress) }})</text></view>
 							</view>
 						</block>
-						<block v-if="child.type === '3'">
+						<block v-if="child.type === '3' && child.params.transactAddress1">
 							<view class="flex content">
 								<view class="label">代办点</view>
 								<view class="detail">{{child.params.transactAddress1.address}} <text v-if="current === 0" class="distance">（距离：{{ locationDistance(child.params.transactAddress1) }})</text></view>
@@ -49,10 +49,13 @@
 								<view class="detail">{{child.params.pickupAddress.address}} <text v-if="current === 0" class="distance">（距离：{{ locationDistance(child.params.pickupAddress) }})</text></view>
 							</view>
 						</block>
-						<view class="flex content">
+						<view v-if="['1', '2', '4'].includes(child.type)" class="flex content">
 							<view class="label">收货地址</view>
-							<view v-if="['1', '2', '4'].includes(child.type)" class="detail">{{child.params.receiptAddress.address}} <text v-if="current === 0" class="distance">（距离：{{ locationDistance(child.params.receiptAddress) }})</text></view>
-							<view v-else class="detail">{{child.params.transactAddress2.address}} <text v-if="current === 0" class="distance">（距离：{{ locationDistance(child.params.transactAddress2) }})</text></view>
+							<view class="detail">{{child.params.receiptAddress.address}} <text v-if="current === 0" class="distance">（距离：{{ locationDistance(child.params.receiptAddress) }})</text></view>
+						</view>
+						<view v-else-if="child.type === '3' && child.params.transactAddress2" class="flex content">
+							<view class="label">代办点2</view>
+							<view class="detail">{{child.params.transactAddress2.address}} <text v-if="current === 0" class="distance">（距离：{{ locationDistance(child.params.transactAddress2) }})</text></view>
 						</view>
 						<view v-if="Number(current) === 0" class="flex btn-list">
 							<view class="btn-item" @tap.stop="grabOrder(child)">抢单</view>

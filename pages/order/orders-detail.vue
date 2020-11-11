@@ -46,8 +46,8 @@
 						<uni-list-item title="取货地址" :rightText="detail.params.deliverAddress.address" :showArrow="false"></uni-list-item>
 						<uni-list-item title="联系人" :rightText="detail.params.deliverAddress.realname + ' ' + detail.params.deliverAddress.phone" :showArrow="false"></uni-list-item>
 					</block>
-					<block v-if="detail.type === '3'">
-						<uni-list-item title="取货地址" :rightText="detail.params.transactAddress1.address" :showArrow="false"></uni-list-item>
+					<block v-if="detail.type === '3' && detail.params.transactAddress1">
+						<uni-list-item title="代办点1" :rightText="detail.params.transactAddress1.address" :showArrow="false"></uni-list-item>
 						<uni-list-item title="联系人" :rightText="detail.params.transactAddress1.realname + ' ' + detail.params.transactAddress1.phone" :showArrow="false"></uni-list-item>
 					</block>
 					<block v-if="detail.type === '4'">
@@ -66,8 +66,8 @@
 						<uni-list-item title="收货地址" :rightText="detail.params.receiptAddress.address" :showArrow="false"></uni-list-item>
 						<uni-list-item title="联系人" :rightText="detail.params.receiptAddress.realname + ' ' + detail.params.receiptAddress.phone" :showArrow="false"></uni-list-item>
 					</block>
-					<block v-else>
-						<uni-list-item title="收货地址" :rightText="detail.params.transactAddress2.address" :showArrow="false"></uni-list-item>
+					<block v-else-if="detail.type === '3' && detail.params.transactAddress2">
+						<uni-list-item title="代办点2" :rightText="detail.params.transactAddress2.address" :showArrow="false"></uni-list-item>
 						<uni-list-item title="联系人" :rightText="detail.params.transactAddress2.realname + ' ' + detail.params.transactAddress2.phone" :showArrow="false"></uni-list-item>
 					</block>
 				</uni-list>
@@ -269,19 +269,14 @@
 								break
 							case '3':
 								typeName = '帮帮我'
-								let distance1 = getDistance(obj.params.transactAddress1.latitude, obj.params.transactAddress1.longitude, this.currentLocation.latitude, this.currentLocation.longitude)
-								distance1 = distance1 > 0 ? distance1.toFixed(2) + '公里' : Math.round(distance1 * 1000) + '米'
-								let distance2 = getDistance(obj.params.transactAddress2.latitude, obj.params.transactAddress2.longitude, this.currentLocation.latitude, this.currentLocation.longitude)
-								distance2 = distance2 > 0 ? distance2.toFixed(2) + '公里' : Math.round(distance2 * 1000) + '米'
-								Object.prototype.push.apply(this.includePoints, {
-									latitude: obj.params.transactAddress1.latitude,
-									longitude: obj.params.transactAddress1.longitude
-								}, {
-									latitude: obj.params.transactAddress2.latitude,
-									longitude: obj.params.transactAddress2.longitude
-								})
-								Object.prototype.push.apply(this.markers, [
-									{
+								if (obj.params.transactAddress1) {
+									let distance1 = getDistance(obj.params.transactAddress1.latitude, obj.params.transactAddress1.longitude, this.currentLocation.latitude, this.currentLocation.longitude)
+									distance1 = distance1 > 0 ? distance1.toFixed(2) + '公里' : Math.round(distance1 * 1000) + '米',
+									this.includePoints.push({
+										latitude: obj.params.transactAddress1.latitude,
+										longitude: obj.params.transactAddress1.longitude
+									})
+									this.markers.push({
 										id: 1,
 										...this.marker,
 										latitude: obj.params.transactAddress1.latitude,
@@ -291,8 +286,16 @@
 											...this.callout,
 											content: `代办点1：${obj.params.transactAddress1.address}` + '\n距离约' + distance1
 										}
-									},
-									{
+									})
+								}
+								if (obj.params.transactAddress2) {
+									let distance2 = getDistance(obj.params.transactAddress2.latitude, obj.params.transactAddress2.longitude, this.currentLocation.latitude, this.currentLocation.longitude)
+									distance2 = distance2 > 0 ? distance2.toFixed(2) + '公里' : Math.round(distance2 * 1000) + '米',
+									this.includePoints.push({
+										latitude: obj.params.transactAddress2.latitude,
+										longitude: obj.params.transactAddress2.longitude
+									})
+									this.markers.push({
 										id: 2,
 										...this.marker,
 										latitude: obj.params.transactAddress2.latitude,
@@ -302,8 +305,8 @@
 											...this.callout,
 											content: `代办点2：${obj.params.transactAddress2.address}` + '\n距离约' + distance2
 										}
-									}
-								])
+									})
+								}
 								break
 							case '4':
 								typeName = '包裹单'
