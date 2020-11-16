@@ -24,6 +24,9 @@
 				const userInfo = res.detail.userInfo
 				uni.setStorageSync('userInfo', JSON.stringify(userInfo))
 				if (userInfo) {
+					uni.showLoading({
+						title: '加载中...'
+					})
 					const user_id = uni.getStorageSync('user_id')
 					this.$myRequest({
 						api: '/api/user/set-property',
@@ -33,10 +36,12 @@
 							sex: userInfo.gender + ''
 						}
 					}).then(res => {
+						uni.hideLoading()
 						uni.navigateBack({
 							delta: 1
 						})
 					}).catch(err => {
+						uni.hideLoading()
 						uni.navigateBack({
 							delta: 1
 						})

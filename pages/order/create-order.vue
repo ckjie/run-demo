@@ -168,11 +168,12 @@
 			
 			<view class="flex protocol">
 				<view class="title">点击查看</view>
-				<view @tap="toPage('/pages/other/rich?key=protocol')">《跑腿服务协议》</view>
+				<view @tap="toPage('/pages/other/rich?key=KEY_CHARGE_NOTE')">《跑腿服务协议》</view>
 			</view>
 			
 			<view class="section bottom">
 				<view class="flex total" @tap="openPopup('detailPopup')">
+					<view v-show="distanceDiff > 0" class="distance-text">{{ distanceDiff > 1 ? distanceDiff + '公里' : distanceDiff * 1000 + '米' }}</view>
 					<view>跑腿费</view>
 					<view class="amount">{{ totalAMount }}元</view>
 					<uni-icons type="arrowup" size="12"></uni-icons>
@@ -321,6 +322,7 @@
 					</view>
 					<view class="bottom-box">
 						<view class="flex total" @tap="closePopup('detailPopup')">
+							<view v-show="distanceDiff > 0" class="distance-text">{{ distanceDiff > 1 ? distanceDiff + '公里' : distanceDiff * 1000 + '米' }}</view>
 							<view>跑腿费</view>
 							<view class="amount">{{ totalAMount }}元</view>
 							<uni-icons type="arrowup" size="12"></uni-icons>
@@ -338,6 +340,7 @@
 <script>
 	import uploadImage from '@/common/ossutil/uploadFile.js'
 	import uploadModule from '@/components/upload-module/upload-module.vue'
+	import { getDistance } from '@/utils/getDistance.js'
 	
 	const recorderManager = uni.getRecorderManager()
 	const innerAudioContext = uni.createInnerAudioContext()
@@ -354,7 +357,9 @@
 				todayTimeList: [],
 				otherDayTimeList: [],
 				isRecording: false,
-				basePrice: 10,
+				basePrice: 10, // 基础配送费
+				baseDistance: 2, // 基础配送距离
+				distanceUnitPrice: 1, // 超出距离单价
 				advanceAmount: '',// 预估商品费
 				tipAmount: '',// 小费
 				tipAmountKey: 0,
@@ -390,10 +395,10 @@
 				},
 				addressType: '',
 				commonWords: {
-					buy: ['小吃', '快餐', '美食', '饮品', '生鲜', '医药', '其他'],
-					deliver: ['快递包裹', '钥匙文件', '餐饮食品', '其他'],
-					transact: ['收发快递', '打字复印', '送花示爱', '发请帖', '代我送', '排队', '证件代办', '缴费', '直接联系我'],
-					pickup: ['菜鸟驿站', '快递配送站', '便利店', '到付件']
+					buy: [],
+					deliver: [],
+					transact: [],
+					pickup: []
 				},
 				titleSource: {
 					buy: '跑王代买',
@@ -479,11 +484,51 @@
 		},
 		
 		computed: {
-			totalAMount () {
-				let result = this.basePrice
-				if (this.formData.item_weight > 10) {
-					result += this.formData.item_weight - 10
+			distanceDiff () {
+				let result = 0
+				switch (this.wordsKey) {
+					case 'buy':
+						if (this.formData.buyType === 'address' && this.formData.buyAddress.latitude && this.formData.receiptAddress.latitude) {
+							result = getDistance(this.formData.buyAddress.latitude, this.formData.buyAddress.longitude, this.formData.receiptAddress.latitude, this.formData.receiptAddress.longitude)
+						}
+						break
+					case 'deliver':
+						if (this.formData.deliverAddress.latitude && this.formData.receiptAddress.latitude) {
+							result = getDistance(this.formData.deliverAddress.latitude, this.formData.deliverAddress.longitude, this.formData.receiptAddress.latitude, this.formData.receiptAddress.longitude)
+						}
+						break
+					case 'pickup':
+						if (this.formData.pickupAddress.latitude && this.formData.receiptAddress.latitude) {
+							result = getDistance(this.formData.pickupAddress.latitude, this.formData.pickupAddress.longitude, this.formData.receiptAddress.latitude, this.formData.receiptAddress.longitude)
+						}
+						break
+					default:
+						break
 				}
+				result > 0 && (result = result.toFixed(2))
+				return result
+			},
+			
+			payPrice () {
+				let result = this.basePrice
+				if (['buy', 'deliver', 'pickup'].includes(this.wordsKey)) {
+					if (this.distanceDiff > 2) {
+						const diff = Math.ceil(this.distanceDiff - 2)
+						result += diff * this.distanceUnitPrice
+					}
+				} else if (this.wordsKey === 'transact') {
+					if (this.formData.transactAddress1.address && this.formData.transactAddress2.address) {
+						result = result * 2
+					}
+				}
+				return result
+			},
+			
+			totalAMount () {
+				let result = this.payPrice
+				// if (this.formData.item_weight > 10) {
+				// 	result += this.formData.item_weight - 10
+				// }
 				if (this.formData.attachFee) {
 					result += +this.formData.attachFee.price
 				}
@@ -504,9 +549,77 @@
 		
 		methods: {
 			init () {
+				this.getWords()
+				this.getAmounts()
 				this.getDateList()
 				this.getTodayTime()
 				this.getOtherDayTime()
+			},
+			
+			getWords () {
+				uni.showLoading({
+					title: '加载中...'
+				})
+				this.$myRequest({
+					api: '/api/config/get-config',
+					methods: 'GET',
+					params: {
+						name: 'KEY_USED_WORDS'
+					}
+				}).then(res => {
+					uni.hideLoading()
+					if (res.data.err_code === 0) {
+						const info = JSON.parse(res.data.data)
+						this.commonWords = Object.assign({}, this.commonWords, {
+							buy: info.order_type_buy || [],
+							deliver: info.order_type_deliver || [],
+							transact: info.order_type_transact || [],
+							pickup: info.order_type_pick_up || []
+						})
+					}
+				})
+			},
+			
+			getAmounts () {
+				uni.showLoading({
+					title: '加载中...'
+				})
+				this.$myRequest({
+					api: '/api/config/get-config',
+					methods: 'GET',
+					params: {
+						name: 'KEY_CHARGE_RULE'
+					}
+				}).then(res => {
+					if (res.data.err_code === 0) {
+						uni.hideLoading()
+						const info = JSON.parse(res.data.data)
+						switch(this.wordsKey) {
+							case 'buy':
+								this.basePrice = info.order_type_buy.starting_price
+								this.baseDistance = info.order_type_buy.starting_distance
+								this.distanceUnitPrice = info.order_type_buy.beyond_price
+								break
+							case 'deliver':
+								this.basePrice = info.order_type_deliver.starting_price
+								this.baseDistance = info.order_type_deliver.starting_distance
+								this.distanceUnitPrice = info.order_type_deliver.beyond_price
+								break
+							case 'transact':
+								this.basePrice = info.order_type_transact.starting_price
+								this.baseDistance = info.order_type_transact.starting_distance
+								this.distanceUnitPrice = info.order_type_transact.beyond_price
+								break
+							case 'pickup':
+								this.basePrice = info.order_type_pick_up.starting_price
+								this.baseDistance = info.order_type_pick_up.starting_distance
+								this.distanceUnitPrice = info.order_type_pick_up.beyond_price
+								break
+							default:
+								break
+						}
+					}
+				})
 			},
 			
 			getDateList () {
@@ -541,6 +654,7 @@
 					let m = now.getMinutes()
 					m = +m + 20
 					now.setMinutes(m)
+					if (now.getHours() >= 0 && now.getHours() <= 7) continue
 					const time = now.toTimeString().slice(0, 5)
 					now.getTime() <= tomorrowTime && timeList.push(time)
 				}
@@ -552,7 +666,7 @@
 			},
 			getOtherDayTime () {
 				const timeList = []
-				for (let i = 0; i < 24; i++) {
+				for (let i = 8; i < 24; i++) {
 					for (let j = 0; j < 60; j+= 20) {
 						const h = ('0' + i).slice(-2)
 						const m = ('0' + j).slice(-2)
@@ -831,8 +945,7 @@
 				}
 				let params = {
 					type: buyType[this.wordsKey],
-					// pay_price: this.basePrice,
-					pay_price: 0.01,
+					pay_price: this.payPrice,
 					tip: this.formData.tip || 0,
 					remark: this.formData.remark,
 					item_weight: this.formData.item_weight,
@@ -1025,6 +1138,10 @@
 		justify-content: flex-end;
 		align-items: baseline;
 		padding: 10rpx 0;
+		.distance-text {
+			margin-right: auto;
+			padding-left: 10rpx;
+		}
 		.amount {
 			font-size: 36rpx;
 			color: red;

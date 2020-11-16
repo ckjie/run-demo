@@ -16,7 +16,7 @@
 		<view class="description">
 			<view class="title">跑腿特色</view>
 			<view class="flex list">
-				<view class="item" @tap="toPage('/pages/other/rich?key=priceAbout')">
+				<view class="item" @tap="toPage('/pages/other/rich?key=KEY_SERVICE_AGREEMENT')">
 					<view class="flex icon-box">
 						<uni-icons type="sound" size="24"></uni-icons>
 					</view>

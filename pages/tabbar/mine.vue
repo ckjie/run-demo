@@ -45,7 +45,7 @@
 				uni.getUserInfo({
 					lang: 'zh_CN',
 					success: res => {
-						uni.setStorageSync('userInfo', res.userInfo)
+						uni.setStorageSync('userInfo', JSON.stringify(res.userInfo))
 						this.userInfo = res.userInfo
 					}
 				})

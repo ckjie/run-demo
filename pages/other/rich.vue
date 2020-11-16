@@ -1,23 +1,24 @@
 <template>
 	<view class="page-bgc page">
 		<view class="body">
-			<view v-if="textKey === 'protocol'" class="title">{{ titleSource[textKey] }}</view>
+			<!-- <view v-if="textKey === 'protocol'" class="title">{{ titleSource[textKey] }}</view> -->
 			<jyf-parser :html="richText" ref="article"></jyf-parser>
 		</view>
 	</view>
 </template>
 
 <script>
-	import { protocol, priceAbout } from '@/utils/rich-texts.js'
+	// import { protocol, priceAbout } from '@/utils/rich-texts.js'
 	
 	export default {
 		data() {
 			return {
 				titleSource: {
-					protocol: '帮送服务协议',
-					priceAbout: '常见问题'
+					KEY_CHARGE_NOTE: '跑腿服务协议',
+					KEY_SERVICE_AGREEMENT: '价格说明'
 				},
-				textKey: ''
+				textKey: '',
+				richText: ''
 			}
 		},
 		
@@ -26,20 +27,27 @@
 			uni.setNavigationBarTitle({
 				title: this.titleSource[params.key] || '跑腿王'
 			})
-		},
-		
-		computed: {
-			richText () {
-				if (this.textKey === 'protocol') {
-					return protocol
-				} else if (this.textKey === 'priceAbout') {
-					return priceAbout
-				}
-			}
+			this.getText()
 		},
 		
 		methods: {
-			
+			getText () {
+				uni.showLoading({
+					title: '加载中...'
+				})
+				this.$myRequest({
+					api: '/api/config/get-config',
+					methods: 'GET',
+					params: {
+						name: this.textKey
+					}
+				}).then(res => {
+					uni.hideLoading()
+					if (res.data.err_code === 0) {
+						this.richText = res.data.data
+					}
+				})
+			}
 		}
 	}
 </script>

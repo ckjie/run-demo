@@ -151,7 +151,8 @@
 				includePoints: [],
 				marker: { width: 30, height: 30 },
 				callout: { fontSize: 14, padding: 10, borderRadius: 6 },
-				currentLocation: {}
+				currentLocation: {},
+				tempList: []
 			}
 		},
 		
@@ -339,6 +340,7 @@
 							case '1':
 								statusName = '待接单'
 								showTime = obj.pay_at
+								this.getTemp()
 								break
 							case '2':
 								statusName = '已接单'
@@ -395,6 +397,45 @@
 				})
 			},
 			
+			getTemp () {
+				uni.showLoading({
+					title: '加载中...'
+				})
+				this.$myRequest({
+					api: '/api/courier/subscribe-temp',
+					params: {}
+				}).then(res => {
+					uni.hideLoading()
+					if (res.data.err_code === 0 && res.data.data) {
+						this.tempList = res.data.data
+					}
+				}).catch(err => uni.hideLoading())
+			},
+			
+			requestTemp () {
+				const that = this
+				if (that.tempList.length) {
+					uni.requestSubscribeMessage({
+						tmplIds: that.tempList,
+						success: res => {
+							uni.showLoading({
+								title: '加载中...'
+							})
+							that.$myRequest({
+								api: '/api/user/subscribe',
+								params: {
+									temp_ids: that.tempList
+								}
+							}).then(res => {
+								uni.hideLoading()
+							}).catch(err => {
+								uni.hideLoading()
+							})
+						}
+					})
+				}
+			},
+			
 			grabOrder () {
 				uni.showLoading({
 					title: '操作中...',
@@ -412,7 +453,10 @@
 						uni.showToast({
 							title: '抢单成功'
 						})
-						this.getDetail()
+						setTimeout(() => {
+							this.getDetail()
+							this.requestTemp()
+						}, 1200)
 					} else {
 						uni.showToast({
 							title: '抢单失败，请重试',
