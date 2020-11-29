@@ -1,7 +1,7 @@
 <script>
 export default {
 	globalData: {
-		baseUrl: 'https://www.it-demo.top',
+		baseUrl: 'https://www.dlsdpt.net',
 		appid: 'wxd4b354044e2b22e6',
 		timers: new Map()
 	},

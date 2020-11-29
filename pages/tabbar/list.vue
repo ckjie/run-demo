@@ -459,6 +459,7 @@ page {
 		.title {
 			view {
 				font-size: 32rpx;
+				color: red;
 			}
 			padding-bottom: 20rpx;
 			border-bottom: 1px solid #F0F0F0;

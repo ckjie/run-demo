@@ -12,7 +12,7 @@
 						<view class="address">{{ item.address }}</view>
 					</view>
 					<view class="right" @tap="editAddress(item)">
-						<uni-icons type="compose" size="18"></uni-icons>
+						<uni-icons type="compose" color="#0CD6A6" size="18"></uni-icons>
 					</view>
 				</view>
 			</view>

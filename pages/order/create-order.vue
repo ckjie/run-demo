@@ -53,7 +53,7 @@
 				<view class="flex item sound">
 					<view class="title">录音</view>
 					<view class="flex recording-btn" hover-class="hover-btn" @touchstart="isStart" @touchend="isEnd">
-						<uni-icons type="mic" size="14"></uni-icons>
+						<uni-icons type="mic" color="#0CD6A6" size="14"></uni-icons>
 						<view class="text">{{ isRecording ? '录音中...' : '按住录音'}}</view>
 					</view>
 					<view v-if="formData.sound" class="flex sound-box" hover-class="hover-btn" @tap="playSound">
@@ -81,7 +81,7 @@
 					<view class="flex item">
 						<view class="title">附加费</view>
 						<view class="flex list">
-							<view class="option-item" :class="{'active': (formData.attachFee && formData.attachFee.key === item.key)}" v-for="item in attachFeeList" :key="item.key" @tap="clickAttach(item, 'attachFee')">{{ item.title }} +￥{{ item.price}}</view>
+							<view class="option-item" :class="{'active': (formData.attachFee && formData.attachFee.key === item.key)}" v-for="item in attachFeeList" :key="item.key" @tap="clickAttach(item, 'attachFee')">{{ item.title }} <text class="price-num">+￥{{ item.price}}</text></view>
 						</view>
 					</view>
 				</view>
@@ -89,7 +89,7 @@
 					<view class="flex item">
 						<view class="title">选填</view>
 						<view class="flex list">
-							<view class="option-item" :class="{'active': (formData.addressNum && formData.addressNum.key === item.key)}" v-for="item in addressNumList" :key="item.key" @tap="clickAttach(item, 'addressNum')">{{ item.title }} +￥{{ item.price}}</view>
+							<view class="option-item" :class="{'active': (formData.addressNum && formData.addressNum.key === item.key)}" v-for="item in addressNumList" :key="item.key" @tap="clickAttach(item, 'addressNum')">{{ item.title }} <text class="price-num">+￥{{ item.price}}</text></view>
 						</view>
 					</view>
 				</view>
@@ -97,7 +97,7 @@
 					<view class="flex item">
 						<view class="title">顺带加价</view>
 						<view class="flex list">
-							<view class="option-item" :class="{'active': formData.incidentally.some(child => child.key === item.key)}" v-for="item in incidentallyList" :key="item.key" @tap="clickAttach(item, 'incidentally')">{{ item.title }} +￥{{ item.price}}</view>
+							<view class="option-item" :class="{'active': formData.incidentally.some(child => child.key === item.key)}" v-for="item in incidentallyList" :key="item.key" @tap="clickAttach(item, 'incidentally')">{{ item.title }} <text class="price-num">+￥{{ item.price}}</text></view>
 						</view>
 					</view>
 				</view>
@@ -189,7 +189,7 @@
 			<view class="popup-item advance-popup">
 				<view class="flex top">
 					<view @tap="closePopup('advancePopup')">取消</view>
-					<view class="title">预估商品费</view>
+					<view class="title popup-title">预估商品费</view>
 					<view @tap="confirmAdvance">确定</view>
 				</view>
 				<view class="body">
@@ -211,7 +211,7 @@
 			<view class="popup-item time-popup">
 				<view class="flex top">
 					<view class="cancel" @tap="closePopup('timePopup')">取消</view>
-					<view class="title">取件时间</view>
+					<view class="title popup-title">取件时间</view>
 				</view>
 				<view class="body">
 					<scroll-view class="list date-list" scroll-y="true">
@@ -240,7 +240,7 @@
 			<view class="popup-item weight-popup">
 				<view class="flex top">
 					<view class="cancel" @tap="closePopup('weightPopup')">取消</view>
-					<view class="title">物品重量</view>
+					<view class="title popup-title">物品重量</view>
 				</view>
 				<view class="body">
 					<view>重量</view>
@@ -260,7 +260,7 @@
 			<view class="popup-item tip-popup">
 				<view class="flex top">
 					<view @tap="closePopup('tipPopup')">取消</view>
-					<view class="title">小费</view>
+					<view class="title popup-title">小费</view>
 					<view @tap="confirmTip">确定</view>
 				</view>
 				<view class="body">
@@ -285,38 +285,38 @@
 		<uni-popup ref="detailPopup" type="bottom">
 			<view class="popup-item detail-popup">
 				<view class="flex top">
-					<view class="title">费用明细</view>
+					<view class="title popup-title">费用明细</view>
 				</view>
 				<view class="body">
 					<view class="list">
 						<view class="flex item">
 							<view>基础配送费</view>
-							<view>￥{{ basePrice }}</view>
+							<view class="price-num">￥{{ basePrice }}</view>
 						</view>
-						<view class="flex item">
+					<!-- 	<view class="flex item">
 							<view>特殊时段附加费</view>
 							<view>￥666</view>
-						</view>
-						<view v-show="formData.item_weight > 10" class="flex item">
+						</view> -->
+					<!-- 	<view v-show="formData.item_weight > 10" class="flex item">
 							<view>重量附加费</view>
 							<view>￥{{ formData.item_weight - 10 }}</view>
-						</view>
+						</view> -->
 						<view v-show="tipAmount > 0" class="flex item">
 							<view>小费</view>
-							<view>￥{{ tipAmount }}</view>
+							<view class="price-num">￥{{ tipAmount }}</view>
 						</view>
 						<view v-show="formData.attachFee" class="flex item">
 							<view>附加费-{{ formData.attachFee.title }}</view>
-							<view>￥{{ formData.attachFee.price }}</view>
+							<view class="price-num">￥{{ formData.attachFee.price }}</view>
 						</view>
 						<view v-show="formData.addressNum" class="flex item">
 							<view>选填-{{ formData.addressNum.title }}</view>
-							<view>￥{{ formData.addressNum.price }}</view>
+							<view class="price-num">￥{{ formData.addressNum.price }}</view>
 						</view>
 						<block v-show="formData.incidentally.length">
 							<view v-for="item in formData.incidentally" :key="item.key" class="flex item">
 								<view>顺带加价-{{ item.title }}</view>
-								<view>￥{{ item.price }}</view>
+								<view class="price-num">￥{{ item.price }}</view>
 							</view>
 						</block>
 					</view>
@@ -681,7 +681,7 @@
 			},
 			
 			clickWord (item) {
-				this.formData.text += `${item} `
+				this.formData.remark += `${item} `
 			},
 			
 			confirmAdvance () {
@@ -1084,14 +1084,15 @@
 			margin-right: 30rpx;
 		}
 		.item {
-			border: 1px solid #666666;
+			color: #666666;
+			border: 1px solid;
 			border-radius: 10rpx;
 			padding: 8rpx 16rpx;
 			margin-right: 20rpx;
 			font-size: 24rpx;
 		}
 		.active {
-			border-color: red;
+			color: red;
 		}
 	}
 	.address {
@@ -1252,11 +1253,17 @@
 			border: 1px solid #CCCCCC;
 			border-radius: 10rpx;
 			margin-right: 20rpx;
+			.price-num {
+				color: $uni-color-main;
+			}
 		}
 		.active {
 			background-color: $uni-color-main;
 			color: #FFFFFF;
 			border-color: transparent;
+			.price-num {
+				color: #FFFFFF;
+			}
 		}
 	}
 }
@@ -1268,6 +1275,9 @@
 		border-bottom: 1px solid #EEEEEE;
 		.title {
 			font-size: 32rpx;
+		}
+		.popup-title {
+			color: $uni-color-main;
 		}
 	}
 }
@@ -1320,11 +1330,7 @@
 		align-items: flex-start;
 		.list {
 			height: 460rpx;
-			// overflow-y: scroll;
 			text-align: center;
-			// display: flex;
-			// flex-direction: column;
-			// align-items: center;
 			.item {
 				text-align: center;
 				padding: 20rpx 0;
@@ -1435,8 +1441,17 @@
 				justify-content: space-between;
 				padding: 10rpx 0;
 				color: #999999;
+				.price-num {
+					color: rgba(255, 0, 0, .9);
+				}
 			}
 		}
+	}
+}
+
+.other-fee {
+	/deep/ .uni-list-item__extra-text {
+		color: rgba(255, 0, 0, .6);
 	}
 }
 </style>

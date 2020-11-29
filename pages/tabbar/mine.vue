@@ -10,13 +10,13 @@
 		</view>
 		<view class="menus">
 			<uni-list>
-				<uni-list-item title="收货地址" showExtraIcon="true" :extraIcon="{ color: '#999', size: '16', type: 'location-filled' }" @tap="toPage('/pages/user/address-list')"></uni-list-item>
-				<uni-list-item title="骑手端" showExtraIcon="true" :extraIcon="{ color: '#999', size: '16', type: 'contact-filled' }" @tap="checkIdentity('/pages/tabbar/list')"></uni-list-item>
+				<uni-list-item title="收货地址" showExtraIcon="true" :extraIcon="{ color: '#0CD6A6', size: '16', type: 'location-filled' }" @tap="toPage('/pages/user/address-list')"></uni-list-item>
+				<uni-list-item title="骑手端" showExtraIcon="true" :extraIcon="{ color: '#0CD6A6', size: '16', type: 'contact-filled' }" @tap="checkIdentity('/pages/tabbar/list')"></uni-list-item>
 				<button class="btn-item" open-type="contact">
-					<uni-list-item title="帮助" showExtraIcon="true" :extraIcon="{ color: '#999', size: '16', type: 'help-filled' }"></uni-list-item>
+					<uni-list-item title="帮助" showExtraIcon="true" :extraIcon="{ color: '#0CD6A6', size: '16', type: 'help-filled' }"></uni-list-item>
 				</button>
 				<button class="btn-item" open-type="openSetting">
-					<uni-list-item title="设置" showExtraIcon="true" :extraIcon="{ color: '#999', size: '16', type: 'gear-filled' }"></uni-list-item>
+					<uni-list-item title="设置" showExtraIcon="true" :extraIcon="{ color: '#0CD6A6', size: '16', type: 'gear-filled' }"></uni-list-item>
 				</button>
 			</uni-list>
 		</view>

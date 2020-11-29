@@ -3,7 +3,7 @@
 		<view class="section">
 			<view class="flex item" @tap="chooseLocation">
 				<view class="title">小区/大厦/学校</view>
-				<uni-icons type="location-filled" color="#999" size="14"></uni-icons>
+				<uni-icons type="location-filled" color="#0CD6A6" size="14"></uni-icons>
 				<view class="location">{{ detail.location }}</view>
 				<uni-icons style="margin-left: auto;" type="arrowright" size="16"></uni-icons>
 			</view>
@@ -221,6 +221,7 @@
 	}
 	.del-btn {
 		background-color: #FFFFFF;
+		color: red;
 	}
 }
 </style>

@@ -155,7 +155,7 @@
 				marker: { width: 30, height: 30 },
 				callout: { fontSize: 14, padding: 10, borderRadius: 6 },
 				controls: [
-					{ id: 1, position: { left: 16, top: 290, width: 24, height: 24 }, iconPath: '/static/img/refresh.png', clickable: true }
+					{ id: 1, position: { left: 16, top: 16, width: 24, height: 24 }, iconPath: '/static/img/refresh.png', clickable: true }
 				]
 			}
 		},
