@@ -73,7 +73,7 @@
 			position: absolute;
 			top: 0;
 			left: 0;
-			border-top: 1px solid #999999;
+			border-top: 1px solid #CCCCCC;
 			transform: scaleY(.5);
 		}
 		.list {

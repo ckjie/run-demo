@@ -1,9 +1,9 @@
 <template>
 	<view>
 		<view class="top-pic">
-			<image v-if="wordsKey === 'buy'" src="../../static/img/text-logo.png" mode="widthFix"></image>
-			<image v-else-if="wordsKey === 'deliver'" src="../../static/img/top-send.png" mode="widthFix"></image>
-			<image v-else-if="wordsKey === 'transact'" src="../../static/img/top-handle.png" mode="widthFix"></image>
+			<!-- <image v-if="wordsKey === 'buy'" src="../../static/img/text-logo.png" mode="widthFix"></image> -->
+			<!-- <image v-else-if="wordsKey === 'deliver'" src="../../static/img/top-send.png" mode="widthFix"></image> -->
+			<!-- <image v-else-if="wordsKey === 'transact'" src="../../static/img/top-handle.png" mode="widthFix"></image> -->
 		</view>
 		<view class="page page-bgc">
 			<view class="section input-module">
@@ -53,7 +53,7 @@
 				<view class="flex item sound">
 					<view class="title">录音</view>
 					<view class="flex recording-btn" hover-class="hover-btn" @touchstart="isStart" @touchend="isEnd">
-						<uni-icons type="mic" color="#0CD6A6" size="14"></uni-icons>
+						<uni-icons type="mic" color="#FF7800" size="14"></uni-icons>
 						<view class="text">{{ isRecording ? '录音中...' : '按住录音'}}</view>
 					</view>
 					<view v-if="formData.sound" class="flex sound-box" hover-class="hover-btn" @tap="playSound">
@@ -221,13 +221,13 @@
 						<block v-if="dateList[0] && formData.date.key === dateList[0].key">
 							<view class="item" v-for="item in todayTimeList" :key="item" @tap="clickTime(item)">
 								<view :class="{'active': item === formData.time}">{{ item }}</view>
-								<uni-icons class="icon" v-show="item === formData.time" type="checkmarkempty" color="#0CD6A6" size="14"></uni-icons>
+								<uni-icons class="icon" v-show="item === formData.time" type="checkmarkempty" color="#FF7800" size="14"></uni-icons>
 							</view>
 						</block>
 						<block v-else>
 							<view class="item" v-for="item in otherDayTimeList" :key="item" @tap="clickTime(item)">
 								<view :class="{'active': item === formData.time}">{{ item }}</view>
-								<uni-icons class="icon" v-show="item === formData.time" type="checkmarkempty" color="#0CD6A6" size="14"></uni-icons>
+								<uni-icons class="icon" v-show="item === formData.time" type="checkmarkempty" color="#FF7800" size="14"></uni-icons>
 							</view>
 						</block>
 					</scroll-view>

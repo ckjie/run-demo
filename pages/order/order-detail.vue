@@ -446,7 +446,7 @@
 			cancelOrder () {
 				uni.showModal({
 					content: '确认取消该订单？',
-					confirmColor: '#0CD6A6',
+					confirmColor: $uni-color-main,
 					success: res => {
 						if (res.confirm) {
 							uni.showLoading({

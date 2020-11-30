@@ -12,7 +12,7 @@
 						<view class="address">{{ item.address }}</view>
 					</view>
 					<view class="right" @tap="editAddress(item)">
-						<uni-icons type="compose" color="#0CD6A6" size="18"></uni-icons>
+						<uni-icons type="compose" color="#FF7800" size="18"></uni-icons>
 					</view>
 				</view>
 			</view>
@@ -20,7 +20,7 @@
 		
 		<view class="add-btn" @tap="editAddress()">
 			<view class="flex btn-box">
-				<uni-icons type="plus-filled" color="#0CD6A6" size="16"></uni-icons>
+				<uni-icons type="plus-filled" color="#FF7800" size="16"></uni-icons>
 				<view class="text">新增收货地址</view>
 			</view>
 		</view>

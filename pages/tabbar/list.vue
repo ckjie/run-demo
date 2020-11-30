@@ -1,6 +1,6 @@
 <template>
 	<view class="page page-bgc">
-		<v-tabs v-model="current" :fixed="true" :scroll="false" :tabs="tabs" :field="'label'" :activeColor="'#0CD6A6'" :lineColor="'#0CD6A6'"></v-tabs>
+		<v-tabs v-model="current" :fixed="true" :scroll="false" :tabs="tabs" :field="'label'" :activeColor="'#FF7800'" :lineColor="'#FF7800'"></v-tabs>
 		<swiper class="swiper" style="height: 100%;" @change='scollSwiper' :current='current'>
 			<swiper-item v-for="(item,index) in tabs" :key='index'>
 					<!-- 使用 scroll-view 来滚动内容区域 -->
@@ -370,7 +370,7 @@
 			isService (item) {
 				uni.showModal({
 					content: '是否确认送达？',
-					confirmColor: '#0CD6A6',
+					confirmColor: $uni-color-main,
 					success: res => {
 						if (res.confirm) {
 							uni.showLoading({

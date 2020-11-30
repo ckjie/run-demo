@@ -17,7 +17,7 @@
 				<radio-group class="flex">
 					<label class="flex label-box" v-for="item in sexList" :key="item.value">
 						<view>
-							<radio :value="item.value" :checked="item.value === formData.sex" color="#0CD6A6" />
+							<radio :value="item.value" :checked="item.value === formData.sex" color="#FF7800" />
 						</view>
 						<view class="radio-label">{{ item.label }}</view>
 					</label>

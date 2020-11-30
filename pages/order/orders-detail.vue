@@ -526,7 +526,7 @@
 			isService () {
 				uni.showModal({
 					content: '是否确认送达？',
-					confirmColor: '#0CD6A6',
+					confirmColor: $uni-color-main,
 					success: res => {
 						if (res.confirm) {
 							uni.showLoading({

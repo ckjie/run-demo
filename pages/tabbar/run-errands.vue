@@ -14,13 +14,12 @@
 			</uni-grid>
 		</view>
 		<view class="description">
-			<view class="title">跑腿特色</view>
+			<view class="title">价格问题</view>
 			<view class="flex list">
 				<view class="item" @tap="toPage('/pages/other/rich?key=KEY_SERVICE_AGREEMENT')">
 					<view class="flex icon-box">
 						<uni-icons type="sound" size="24"></uni-icons>
 					</view>
-					<view>价格问题</view>
 				</view>
 			</view>
 		</view>
@@ -114,6 +113,7 @@
 	.title {
 		font-size: 30rpx;
 		font-weight: 600;
+		color: #999999;
 	}
 	.list {
 		justify-content: center;

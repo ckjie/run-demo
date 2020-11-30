@@ -3,7 +3,7 @@
 		<view class="section">
 			<view class="flex item" @tap="chooseLocation">
 				<view class="title">小区/大厦/学校</view>
-				<uni-icons type="location-filled" color="#0CD6A6" size="14"></uni-icons>
+				<uni-icons type="location-filled" color="#FF7800" size="14"></uni-icons>
 				<view class="location">{{ detail.location }}</view>
 				<uni-icons style="margin-left: auto;" type="arrowright" size="16"></uni-icons>
 			</view>
@@ -18,7 +18,7 @@
 					<radio-group class="flex">
 						<label class="flex label-box" v-for="item in sexList" :key="item.value">
 							<view>
-								<radio :value="item.value" :checked="item.value === detail.sex" color="#0CD6A6" />
+								<radio :value="item.value" :checked="item.value === detail.sex" color="#FF7800" />
 							</view>
 							<view class="radio-label">{{ item.label }}</view>
 						</label>

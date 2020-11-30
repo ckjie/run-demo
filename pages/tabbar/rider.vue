@@ -10,12 +10,12 @@
 		</view>
 		<view class="menus">
 			<uni-list>
-				<!-- <uni-list-item title="成为骑手" showExtraIcon="true" :extraIcon="{ color: '#0CD6A6', size: '16', type: 'contact-filled' }" @tap="relaunchPage('/pages/user/application')"></uni-list-item> -->
+				<!-- <uni-list-item title="成为骑手" showExtraIcon="true" :extraIcon="{ color: $uni-color-main, size: '16', type: 'contact-filled' }" @tap="relaunchPage('/pages/user/application')"></uni-list-item> -->
 				<button class="btn-item" open-type="contact">
-					<uni-list-item title="帮助" showExtraIcon="true" :extraIcon="{ color: '#0CD6A6', size: '16', type: 'help-filled' }"></uni-list-item>
+					<uni-list-item title="帮助" showExtraIcon="true" :extraIcon="{ color: '#FF7800', size: '16', type: 'help-filled' }"></uni-list-item>
 				</button>
 				<button class="btn-item" open-type="openSetting">
-					<uni-list-item title="设置" showExtraIcon="true" :extraIcon="{ color: '#0CD6A6', size: '16', type: 'gear-filled' }"></uni-list-item>
+					<uni-list-item title="设置" showExtraIcon="true" :extraIcon="{ color: '#FF7800', size: '16', type: 'gear-filled' }"></uni-list-item>
 				</button>
 			</uni-list>
 		</view>
@@ -60,16 +60,16 @@
 <style lang="scss" scoped>
 .top {
 	position: relative;
-	background: linear-gradient(to bottom, #007aff, #0CD6A6);
-	height: 300rpx;
+	background: #FFFFFF;
+	height: 200rpx;
 	.info-box {
-		padding-top: 60rpx;
+		padding-top: 18rpx;
 		text-align: center;
 		.avatar {
 			width: 100rpx;
 			height: 100rpx;
 			border-radius: 50%;
-			background-color: $uni-color-main;
+			background-color: #FF7800;
 			margin: 0 auto 20rpx;
 			/deep/ .img {
 				border-radius: 50%;
